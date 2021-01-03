@@ -15,6 +15,9 @@ class Searcher:
         self._ranker = Ranker()
         self._model = model
 
+        self.relevant_docs = {}
+        self.counter_of_terms = {}
+
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.
     def search(self, query, k=None):
@@ -44,10 +47,54 @@ class Searcher:
         :param query_as_list: parsed query tokens
         :return: dictionary of relevant documents mapping doc_id to document frequency.
         """
-        relevant_docs = {}
+        # relevant_docs = {}
+        # for term in query_as_list:
+        #     posting_list = self._indexer.get_term_posting_list(term)
+        #     for doc_id, tf in posting_list:
+        #         df = relevant_docs.get(doc_id, 0)
+        #         relevant_docs[doc_id] = df + 1
+        # return relevant_docs
+
+        # TODO - indexer = dictionary of dictionaries
+
+        flag_open = True
+        file_name = ""
+
         for term in query_as_list:
-            posting_list = self._indexer.get_term_posting_list(term)
-            for doc_id, tf in posting_list:
-                df = relevant_docs.get(doc_id, 0)
-                relevant_docs[doc_id] = df + 1
-        return relevant_docs
+            try:  # an example of checks that you have to do
+
+                upper_term = term.upper()
+                lower_term = term.lower()
+                if term not in self._indexer and lower_term not in self._indexer and upper_term not in self._indexer:
+                    continue
+                if lower_term in self._indexer:
+                    term = lower_term
+                elif upper_term in self._indexer:
+                    term = upper_term
+
+                """--------------------------------------Counter of terms in the query-----------------------------------------"""
+
+                if term in self.relevant_docs.keys():
+                    self.counter_of_terms[term] += 1
+                    continue
+                else:
+                    self.counter_of_terms[term] = 1
+
+                """--------------------------------------Open and Close posting files-----------------------------------------"""
+
+                if self._indexer[term][1] != file_name and not flag_open:
+                    file.close()
+                    flag_open = True
+
+                if flag_open:
+                    file_name = self._indexer[term][1]
+                    with open(file_name, 'rb') as file:
+                        information = dict(pickle.load(file))
+                    flag_open = False
+
+                self.relevant_docs[term] = information[term]
+
+            except:
+                print('term {} not found in posting'.format(term))
+
+        return [self.relevant_docs, self.counter_of_terms]

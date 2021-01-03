@@ -3,9 +3,15 @@ class Indexer:
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.
     def __init__(self, config):
+        # self.inverted_idx = {}
+        # self.postingDict = {}
+        # self.config = config
         self.inverted_idx = {}
         self.postingDict = {}
+        self.entities = {}
         self.config = config
+        self.first_time_term = {}
+        self.doc_dic = {}
 
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.
@@ -17,21 +23,206 @@ class Indexer:
         :return: -
         """
 
+        # document_dictionary = document.term_doc_dictionary
+        # # Go over each term in the doc
+        # for term in document_dictionary.keys():
+        #     try:
+        #         # Update inverted index and posting
+        #         if term not in self.inverted_idx.keys():
+        #             self.inverted_idx[term] = 1
+        #             self.postingDict[term] = []
+        #         else:
+        #             self.inverted_idx[term] += 1
+        #
+        #         self.postingDict[term].append((document.tweet_id, document_dictionary[term]))
+        #
+        #     except:
+        #         print('problem with the following key {}'.format(term[0]))
+
+        max_term_f = 0
+        doc_len = 0
+        unique_terms = 0
+        for value in document.term_doc_dictionary.values():
+            doc_len += value[0]
+            if value[0] == 1:
+                unique_terms += 1
+            if value[0] > max_term_f:
+                max_term_f = value[0]
+
+        """
+        invert dic:
+        key = term
+
+        value =  number of tweets he in 
+                -------------------------------------------------------------------------------------------
+        posting dic:
+        key = term 
+
+        value = [ (tweed id ,[num in this tweet , [positions] ] ,max term freq in the tweet , unique terms in this tweet, doc_len)]
+
+        value = [ {key = doc id : value = [[num in this tweet , [positions], max term freq in the tweet, unique terms in this tweet, doc_le]} ]
+                -------------------------------------------------------------------------------------------
+        doc dic
+        key = tweet id 
+
+        value = [ {key = terms : value = times in doc} ,max f, Wij ]]
+        """
+
         document_dictionary = document.term_doc_dictionary
+
+        self.doc_dic[document.tweet_id] = [{}, max_term_f, 0]
+
         # Go over each term in the doc
         for term in document_dictionary.keys():
             try:
-                # Update inverted index and posting
-                if term not in self.inverted_idx.keys():
+
+                self.doc_dic[document.tweet_id][0][term] = document_dictionary[term][0]
+
+                # new word
+                upper_term = term.upper()
+                lower_term = term.lower()
+
+                """--------------------------------------Entities-----------------------------------------"""
+
+                if " " in term:
+                    # new entity
+                    if term not in self.entities and term not in self.inverted_idx:
+                        self.entities[term] = {}
+                        self.entities[term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms,
+                                                                  doc_len]
+                        continue
+
+                    # second time entity
+                    elif term in self.entities and term not in self.inverted_idx:
+                        self.inverted_idx[term] = 2
+                        """---------------point--------------------"""
+                        self.postingDict[term] = self.entities[term]
+                        self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f,
+                                                                     unique_terms, doc_len]
+                        del self.entities[term]
+                        continue
+
+                    # third and more  entity
+                    elif term not in self.entities and term in self.inverted_idx:
+                        self.inverted_idx[term] += 1
+                        if term not in self.postingDict:
+                            self.postingDict[term] = {}
+                            """---------------point--------------------"""
+                        self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f,
+                                                                     unique_terms, doc_len]
+                        continue
+
+                """--------------------------------------first time term-----------------------------------------"""
+
+                # # first time
+                # if term not in self.inverted_idx and lower_term not in self.inverted_idx and upper_term not in self.inverted_idx \
+                #         and term not in self.first_time_term and upper_term not in self.first_time_term and lower_term not in self.first_time_term:
+                #     self.first_time_term[term] = {}
+                #     self.first_time_term[term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms, doc_len]
+                #     continue
+                #
+                # # big only 1 and now small
+                # elif term.upper() in self.first_time_term and term.islower():
+                #     self.inverted_idx[term] = [2, pointer_posting]
+                #     self.postingDict[term] = self.first_time_term[upper_term]
+                #     self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms, doc_len]
+                #     del self.first_time_term[upper_term]
+                #     continue
+                #
+                # # big only 1 and now big
+                # elif term.upper() in self.first_time_term and term.isupper():
+                #     self.inverted_idx[term] = [2, pointer_posting]
+                #     self.postingDict[term] = self.first_time_term[term]
+                #     self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms, doc_len]
+                #     del self.first_time_term[term]
+                #     continue
+                #
+                # # small only 1 and now big\small
+                # elif term.lower() in self.first_time_term:
+                #     self.inverted_idx[lower_term] = [2, pointer_posting]
+                #     self.postingDict[lower_term] = self.first_time_term[lower_term]
+                #     self.postingDict[lower_term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms, doc_len]
+                #     del self.first_time_term[lower_term]
+                #     continue
+
+                """--------------------------------------@ - Terms-----------------------------------------"""
+
+                if term[0] == "@" and term not in self.inverted_idx:
                     self.inverted_idx[term] = 1
-                    self.postingDict[term] = []
+                    self.postingDict[term] = {}
+                    """---------------point--------------------"""
+                    self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms,
+                                                                 doc_len]
+                    continue
+                elif term[0] == "@" and term in self.inverted_idx:
+                    self.inverted_idx[term] += 1
+                    if term not in self.postingDict:
+                        self.postingDict[term] = {}
+                        """---------------point--------------------"""
+                    self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms,
+                                                                 doc_len]
+                    continue
+
+                """--------------------------------------Url-----------------------------------------"""
+
+                # term from URL
+                if term != lower_term and term != upper_term:
+                    if term not in self.inverted_idx:
+                        self.inverted_idx[term] = 1
+                        self.postingDict[term] = {}
+                        """---------------point--------------------"""
+                        self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f,
+                                                                     unique_terms, doc_len]
+                        continue
+                    else:
+                        self.inverted_idx[term] += 1
+                        if term not in self.postingDict:
+                            self.postingDict[term] = {}
+                            """---------------point--------------------"""
+                        self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f,
+                                                                     unique_terms, doc_len]
+                        continue
+
+                """--------------------------------------All other-----------------------------------------"""
+
+                # all other
+                if term not in self.inverted_idx and lower_term not in self.inverted_idx and upper_term not in self.inverted_idx:
+                    self.inverted_idx[term] = 1
+                    self.postingDict[term] = {}
+                    """---------------point--------------------"""
+                    self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms,
+                                                                 doc_len]
+
+                # Big and then small
+                elif upper_term in self.inverted_idx and term.islower():
+                    self.inverted_idx[term] = self.inverted_idx[upper_term] + 1
+                    if upper_term in self.postingDict:
+                        self.postingDict[term] = self.postingDict[upper_term]
+                        del self.postingDict[upper_term]
+                    else:
+                        self.postingDict[term] = {}
+                        """---------------point--------------------"""
+                    del self.inverted_idx[upper_term]
+                    self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms,
+                                                                 doc_len]
+                # small and then Big
+                elif lower_term in self.inverted_idx and term.isupper():
+                    self.inverted_idx[lower_term] += 1
+                    if lower_term not in self.postingDict:
+                        self.postingDict[lower_term] = {}
+                        """---------------point--------------------"""
+                    self.postingDict[lower_term][document.tweet_id] = [document_dictionary[term], max_term_f,
+                                                                       unique_terms, doc_len]
+                # small and then small
                 else:
                     self.inverted_idx[term] += 1
-
-                self.postingDict[term].append((document.tweet_id, document_dictionary[term]))
-
+                    if term not in self.postingDict:
+                        self.postingDict[term] = {}
+                        """---------------point--------------------"""
+                    self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms,
+                                                                 doc_len]
             except:
-                print('problem with the following key {}'.format(term[0]))
+                print('problem with the following key {}'.format(term))
 
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.

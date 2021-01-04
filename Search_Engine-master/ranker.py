@@ -55,17 +55,17 @@ class Ranker:
                     tweet_id_CosSim[key][0] += tf_idf * term_f
                     tweet_id_CosSim[key][1] += term_f ** 2
 
-                elif term.lower() in value[0]:
-                    tf_idf = value[0][term.lower()]
-                    term_f = counter_of_terms[term]
-                    tweet_id_CosSim[key][0] += tf_idf * term_f
-                    tweet_id_CosSim[key][1] += term_f ** 2
-
-                elif term.upper() in value[0]:
-                    tf_idf = value[0][term.upper()]
-                    term_f = counter_of_terms[term]
-                    tweet_id_CosSim[key][0] += tf_idf * term_f
-                    tweet_id_CosSim[key][1] += term_f ** 2
+                # elif term.lower() in value[0]:
+                #     tf_idf = value[0][term.lower()]
+                #     term_f = counter_of_terms[term]
+                #     tweet_id_CosSim[key][0] += tf_idf * term_f
+                #     tweet_id_CosSim[key][1] += term_f ** 2
+                #
+                # elif term.upper() in value[0]:
+                #     tf_idf = value[0][term.upper()]
+                #     term_f = counter_of_terms[term]
+                #     tweet_id_CosSim[key][0] += tf_idf * term_f
+                #     tweet_id_CosSim[key][1] += term_f ** 2
 
 
 
@@ -74,9 +74,11 @@ class Ranker:
             cos_sim = round(inner_p / norm, 3)
             tweet_id_CosSim[key][2] = cos_sim
 
-        res = sorted(tweet_id_CosSim.items(), key=lambda e: e[1][2], reverse=True)
+        # res = sorted(tweet_id_CosSim.items(), key=lambda e: e[1][2], reverse=True)  # original
+        res = dict(sorted(tweet_id_CosSim.items(), key=lambda e: e[1][2], reverse=True))  # for test
+        res2 = list(res.keys())[:10]
 
-        return res
+        return res2
 
 
 

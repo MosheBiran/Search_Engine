@@ -32,26 +32,26 @@ class SearchEngine:
         Output:
             No output, just modifies the internal _indexer object.
         """
-        # df = pd.read_parquet(fn, engine="pyarrow")
-        # documents_list = df.values.tolist()
-        # # Iterate over every document in the file
-        # number_of_documents = 0
-
-        if self._config is None:
-            config = ConfigClass()
-            config.set__corpusPath(fn)
-            self._config = config
-
-        r = ReadFile(corpus_path=self._config.get__corpusPath())
-        """------------"""
-        """------------"""
+        df = pd.read_parquet(fn, engine="pyarrow")
+        documents_list = df.values.tolist()
+        # Iterate over every document in the file
         number_of_documents = 0
-        documents_list = []
-        for root_path, direc, files_in_dir in os.walk(fn):
-            r.set_new_Root(root_path)
-            for file in files_in_dir:
-                if file.endswith(".parquet"):
-                    documents_list += r.read_file(file)
+
+        # if self._config is None:
+        #     config = ConfigClass()
+        #     config.set__corpusPath("")
+        #     self._config = config
+
+        # r = ReadFile(corpus_path=self._config.get__corpusPath())
+        # """------------"""
+        # """------------"""
+        # number_of_documents = 0
+        # documents_list = []
+        # for root_path, direc, files_in_dir in os.walk(fn):
+        #     r.set_new_Root(root_path)
+        #     for file in files_in_dir:
+        #         if file.endswith(".parquet"):
+        #             documents_list += r.read_file(file)
         # Iterate over every document in the file
 
         for idx, document in enumerate(documents_list):
@@ -62,7 +62,13 @@ class SearchEngine:
             self._indexer.add_new_doc(parsed_document)
         print('Finished parsing and indexing.')
 
-        self._indexer.save_index("idx_bench")
+        self._indexer.save_index("idx_bench.pkl")
+
+        indexer_dic = utils.load_obj("idx_bench")
+        docs_dic = compute_Wi(indexer_dic)  # TODO - check this shit
+        indexer_dic["docs"] = docs_dic
+        utils.save_obj(indexer_dic, "idx_bench")
+
 
 
 
@@ -118,11 +124,7 @@ def main(corpus_path, output_path, queries, k):
     searchEngine.build_index_from_parquet(corpus_path)
 
 
-    indexer_dic = utils.load_obj(output_path + "\\idx_bench")
-    docs_dic = compute_Wi(indexer_dic)  # TODO - check this shit
-    indexer_dic["docs"] = docs_dic
-    searchEngine.load_index("idx_bench")
-    utils.save_obj(indexer_dic, output_path + "\\idx_bench")
+
 
     print("Time To Build The Engine :%.2f" % ((time.time() - timeOfBuild) / 60) + '\n\r')
 

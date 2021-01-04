@@ -41,3 +41,6 @@ class ReadFile:
             Data_Frame = pd.concat(docs_lst, sort=False)
 
         return Data_Frame.values.tolist()
+
+    def set_new_Root(self, root):
+        self.corpus_path = root

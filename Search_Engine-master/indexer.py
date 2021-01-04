@@ -1,4 +1,7 @@
 # DO NOT MODIFY CLASS NAME
+import pickle
+
+
 class Indexer:
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.
@@ -62,8 +65,6 @@ class Indexer:
                 -------------------------------------------------------------------------------------------
         posting dic:
         key = term 
-
-        value = [ (tweed id ,[num in this tweet , [positions] ] ,max term freq in the tweet , unique terms in this tweet, doc_len)]
 
         value = [ {key = doc id : value = [[num in this tweet , [positions], max term freq in the tweet, unique terms in this tweet, doc_le]} ]
                 -------------------------------------------------------------------------------------------
@@ -237,7 +238,11 @@ class Indexer:
         Input:
             fn - file name of pickled index.
         """
-        raise NotImplementedError
+        with open(fn + '.pkl', 'rb') as f:
+            return pickle.load(f)
+
+        # TODO - use utils instead this - load_obj(name)
+
 
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.
@@ -247,7 +252,15 @@ class Indexer:
         Input:
               fn - file name of pickled index.
         """
-        raise NotImplementedError
+
+        indexer_dic = {}
+        indexer_dic["invert"] = self.inverted_idx
+        indexer_dic["posting"] = self.postingDict
+        indexer_dic["docs"] = self.doc_dic
+
+        with open(fn + '.pkl', 'wb') as f:
+            pickle.dump(indexer_dic, f, pickle.HIGHEST_PROTOCOL)
+
 
     # feel free to change the signature and/or implementation of this function 
     # or drop altogether.

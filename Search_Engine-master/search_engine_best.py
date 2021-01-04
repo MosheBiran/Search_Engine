@@ -1,3 +1,6 @@
+import math
+import os
+
 import pandas as pd
 from reader import ReadFile
 from configuration import ConfigClass
@@ -28,10 +31,27 @@ class SearchEngine:
         Output:
             No output, just modifies the internal _indexer object.
         """
-        df = pd.read_parquet(fn, engine="pyarrow")
-        documents_list = df.values.tolist()
-        # Iterate over every document in the file
+        # df = pd.read_parquet(fn, engine="pyarrow")
+        # documents_list = df.values.tolist()
+        # # Iterate over every document in the file
+        # number_of_documents = 0
+
+        if self._config is None:
+            config = ConfigClass()
+            config.set__corpusPath(fn)
+
+        r = ReadFile(corpus_path=config.get__corpusPath())
+        """------------"""
+        """------------"""
         number_of_documents = 0
+        documents_list = []
+        for root_path, direc, files_in_dir in os.walk(fn):
+            r.set_new_Root(root_path)
+            for file in files_in_dir:
+                if file.endswith(".parquet"):
+                    documents_list += r.read_file(file)
+        # Iterate over every document in the file
+
         for idx, document in enumerate(documents_list):
             # parse the document
             parsed_document = self._parser.parse_doc(document)
@@ -39,6 +59,9 @@ class SearchEngine:
             # index the document data
             self._indexer.add_new_doc(parsed_document)
         print('Finished parsing and indexing.')
+
+
+
 
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.
@@ -75,3 +98,76 @@ class SearchEngine:
         """
         searcher = Searcher(self._parser, self._indexer, model=self._model)
         return searcher.search(query)
+
+
+
+
+def main(corpus_path, output_path, queries, k):
+    searchEngine = SearchEngine()
+    searchEngine.build_index_from_parquet(corpus_path)
+
+
+    indexer_dic = utils.load_obj(output_path + "\\idx_bench.pkl")
+    docs_dic = compute_Wi(indexer_dic)  # TODO - check this shit
+    indexer_dic["docs"] = docs_dic
+    searchEngine.load_index(output_path + "\\idx_bench.pkl")
+    utils.save_obj(indexer_dic, output_path + "\\idx_bench.pkl")
+
+
+
+    query_counter = 0
+
+    if type(queries) is list:  # TODO - maybe remove
+        Lines = queries
+
+    else:
+        Lines = []
+        with open(queries, 'rb') as fp:
+            line = fp.readline()
+            while line:
+                if line.decode().strip():
+                    Lines.append(line.decode().strip())
+                line = fp.readline()
+
+    for query in Lines:
+        query_counter += 1
+        for doc_tuple in searchEngine.search(query):
+            print('Tweet id: {} Score: {}'.format(doc_tuple[0], doc_tuple[1][2]))
+
+
+def compute_Wi(indexer):
+
+    information = indexer["docs"]
+    invert = indexer["invert"]
+
+    for key, value in information.items():
+
+        to_remove = []
+
+        for k, v in value[0].items():
+
+            if k not in invert and k.upper() in invert:
+                term = k.upper()
+
+            elif k not in invert and k.lower() in invert:
+                term = k.lower()
+
+            elif k not in invert:
+                to_remove.append(k)
+                continue
+
+            else:
+                term = k
+
+            tf = v / value[1]
+            idf = math.log2(len(indexer["docs"]) / indexer.inverted_idx[term][0])
+            tf_idf = round(tf * idf, 3)
+            value[0][k] = tf_idf
+            x = tf_idf ** 2
+            information[key][2] += tf_idf ** 2
+
+        for k in to_remove:
+            del value[0][k]
+
+    return information
+

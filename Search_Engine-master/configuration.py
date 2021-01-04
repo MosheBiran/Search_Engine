@@ -26,3 +26,12 @@ class ConfigClass:
 
     def get_download_model(self):
         return self._download_model
+
+    def set__corpusPath(self, corpusPath):
+        self.corpusPath = corpusPath
+
+    def set__outputPath(self, outputPath):
+        self.savedFileMainFolder = outputPath
+
+    def get__outputPath(self):
+        return self.savedFileMainFolder

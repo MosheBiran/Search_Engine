@@ -12,7 +12,7 @@ class Searcher:
     def __init__(self, parser, indexer, model=None):
         self._parser = parser
         self._indexer = indexer
-        self._ranker = Ranker()
+        self._ranker = Ranker(indexer["posting"], indexer["docs"])
         self._model = model
 
         self.relevant_docs = {}
@@ -55,7 +55,6 @@ class Searcher:
         #         relevant_docs[doc_id] = df + 1
         # return relevant_docs
 
-        # TODO - indexer = dictionary of dictionaries
 
         # flag_open = True
         # file_name = ""

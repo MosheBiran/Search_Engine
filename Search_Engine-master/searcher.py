@@ -38,7 +38,7 @@ class Searcher:
 
         relevant_docs = self._relevant_docs_from_posting(query_as_list)
         n_relevant = len(relevant_docs)
-        ranked_doc_ids = Ranker.rank_relevant_docs(self._ranker, relevant_docs)[:10]  # TODO - what about k
+        ranked_doc_ids = Ranker.rank_relevant_docs(self._ranker, relevant_docs)  # TODO - what about k
         return self.n_relevant, ranked_doc_ids
         # return n_relevant, ranked_doc_ids  # original
         # return ranked_doc_ids  # not test

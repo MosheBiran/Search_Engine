@@ -7,7 +7,7 @@ from reader import ReadFile
 from configuration import ConfigClass
 from parser_module import Parse
 from indexer import Indexer
-from searcher import Searcher
+from searcher_local_method import SearcherLocalMethod
 import utils
 
 
@@ -106,7 +106,7 @@ class SearchEngine:
             a list of tweet_ids where the first element is the most relavant
             and the last is the least relevant result.
         """
-        searcher = Searcher(self._parser, self._indexer, model=self._model)
+        searcher = SearcherLocalMethod(self._parser, self._indexer, model=self._model)
         return searcher.search(query)
 
 

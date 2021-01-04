@@ -74,7 +74,7 @@ class Ranker:
             cos_sim = round(inner_p / norm, 3)
             if cos_sim > 1:
                 x = 1
-                raise TypeError
+                raise TypeError  # TODO - Remove!!!
             tweet_id_CosSim[key][2] = cos_sim
 
         # res = sorted(tweet_id_CosSim.items(), key=lambda e: e[1][2], reverse=True)  # original

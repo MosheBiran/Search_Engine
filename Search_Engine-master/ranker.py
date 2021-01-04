@@ -49,7 +49,7 @@ class Ranker:
 
         for key, value in tweet_id_data.items():
             for term in counter_of_terms.keys():
-                if term in value[0]:
+                if term in value[0]:  # TODO - term -lower\upper check
                     tf_idf = value[0][term]
                     term_f = counter_of_terms[term]
                     tweet_id_CosSim[key][0] += tf_idf * term_f

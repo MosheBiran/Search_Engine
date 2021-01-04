@@ -149,7 +149,7 @@ def main(corpus_path, output_path, queries, k):
         for doc_tuple in searchEngine.search(query):
             print('Tweet id: {} Score: {}'.format(doc_tuple[0], doc_tuple[1][2]))
 
-        print(" Querytime :%.2f" % ((time.time() - start) / 60) + '\n\r')
+        print("Query time :%.2f" % ((time.time() - start) / 60) + '\n\r')
         print("**************************\n")
 
 

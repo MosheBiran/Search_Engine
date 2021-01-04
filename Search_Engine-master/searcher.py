@@ -12,7 +12,8 @@ class Searcher:
     def __init__(self, parser, indexer, model=None):
         self._parser = parser
         self._indexer = indexer
-        self._ranker = Ranker(indexer["posting"], indexer["docs"])
+        indexer_dic = indexer.load_index("idx_bench")
+        self._ranker = Ranker(indexer_dic["posting"], indexer_dic["docs"])
         self._model = model
 
         self.relevant_docs = {}
@@ -36,10 +37,11 @@ class Searcher:
 
         relevant_docs = self._relevant_docs_from_posting(query_as_list)
         n_relevant = len(relevant_docs)
-        ranked_doc_ids = Ranker.rank_relevant_docs(relevant_docs)
-        return n_relevant, ranked_doc_ids
+        ranked_doc_ids = Ranker.rank_relevant_docs(self._ranker, relevant_docs)[:10]  # TODO - what about k
+        # return n_relevant, ranked_doc_ids
+        return ranked_doc_ids
 
-    # feel free to change the signature and/or implementation of this function 
+    # feel free to change the signature and/or implementation of this function
     # or drop altogether.
     def _relevant_docs_from_posting(self, query_as_list):
         """
@@ -60,9 +62,9 @@ class Searcher:
         # file_name = ""
 
         # posting_dic = {}
-        posting_dic = self._indexer["posting"]
+        posting_dic = self._indexer.load_index("idx_bench")["posting"]
         # invert_dic = {}
-        invert_dic = self._indexer["invert"]
+        invert_dic = self._indexer.load_index("idx_bench")["invert"]
 
         for term in query_as_list:
             try:  # an example of checks that you have to do
@@ -85,7 +87,7 @@ class Searcher:
                     self.counter_of_terms[term] = 1
 
                 """--------------------------------------Open and Close posting files-----------------------------------------"""
-                self.relevant_docs[term] = posting_dic[term].keys()
+                self.relevant_docs[term] = posting_dic[term]
 
                 # if self._indexer[term][1] != file_name and not flag_open:
                 #     file.close()
@@ -101,5 +103,6 @@ class Searcher:
 
             except:
                 print('term {} not found in posting'.format(term))
+
 
         return [self.relevant_docs, self.counter_of_terms]

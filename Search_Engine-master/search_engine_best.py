@@ -1,5 +1,6 @@
 import math
 import os
+import time
 
 import pandas as pd
 from reader import ReadFile
@@ -39,8 +40,9 @@ class SearchEngine:
         if self._config is None:
             config = ConfigClass()
             config.set__corpusPath(fn)
+            self._config = config
 
-        r = ReadFile(corpus_path=config.get__corpusPath())
+        r = ReadFile(corpus_path=self._config.get__corpusPath())
         """------------"""
         """------------"""
         number_of_documents = 0
@@ -59,6 +61,8 @@ class SearchEngine:
             # index the document data
             self._indexer.add_new_doc(parsed_document)
         print('Finished parsing and indexing.')
+
+        self._indexer.save_index("idx_bench")
 
 
 
@@ -103,17 +107,24 @@ class SearchEngine:
 
 
 def main(corpus_path, output_path, queries, k):
-    searchEngine = SearchEngine()
+
+    timeOfBuild = time.time()
+
+    config = ConfigClass()
+    config.set__corpusPath(corpus_path)
+    config.set__outputPath(output_path)
+
+    searchEngine = SearchEngine(config)
     searchEngine.build_index_from_parquet(corpus_path)
 
 
-    indexer_dic = utils.load_obj(output_path + "\\idx_bench.pkl")
+    indexer_dic = utils.load_obj(output_path + "\\idx_bench")
     docs_dic = compute_Wi(indexer_dic)  # TODO - check this shit
     indexer_dic["docs"] = docs_dic
-    searchEngine.load_index(output_path + "\\idx_bench.pkl")
-    utils.save_obj(indexer_dic, output_path + "\\idx_bench.pkl")
+    searchEngine.load_index("idx_bench")
+    utils.save_obj(indexer_dic, output_path + "\\idx_bench")
 
-
+    print("Time To Build The Engine :%.2f" % ((time.time() - timeOfBuild) / 60) + '\n\r')
 
     query_counter = 0
 
@@ -131,8 +142,15 @@ def main(corpus_path, output_path, queries, k):
 
     for query in Lines:
         query_counter += 1
+
+        print("Query Number : " + str(query_counter))  # TODO - Remove
+        start = time.time()
+
         for doc_tuple in searchEngine.search(query):
             print('Tweet id: {} Score: {}'.format(doc_tuple[0], doc_tuple[1][2]))
+
+        print(" Querytime :%.2f" % ((time.time() - start) / 60) + '\n\r')
+        print("**************************\n")
 
 
 def compute_Wi(indexer):
@@ -160,7 +178,7 @@ def compute_Wi(indexer):
                 term = k
 
             tf = v / value[1]
-            idf = math.log2(len(indexer["docs"]) / indexer.inverted_idx[term][0])
+            idf = math.log2(len(indexer["docs"]) / invert[term])
             tf_idf = round(tf * idf, 3)
             value[0][k] = tf_idf
             x = tf_idf ** 2

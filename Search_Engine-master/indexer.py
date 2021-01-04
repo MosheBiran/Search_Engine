@@ -238,7 +238,8 @@ class Indexer:
         Input:
             fn - file name of pickled index.
         """
-        with open(fn + '.pkl', 'rb') as f:
+        path = self.config.get__outputPath() + "\\" + fn
+        with open(path + '.pkl', 'rb') as f:
             return pickle.load(f)
 
         # TODO - use utils instead this - load_obj(name)
@@ -258,7 +259,9 @@ class Indexer:
         indexer_dic["posting"] = self.postingDict
         indexer_dic["docs"] = self.doc_dic
 
-        with open(fn + '.pkl', 'wb') as f:
+        path = self.config.get__outputPath() + "\\" + fn
+
+        with open(path + '.pkl', 'wb') as f:
             pickle.dump(indexer_dic, f, pickle.HIGHEST_PROTOCOL)
 
 

@@ -50,6 +50,11 @@ class Indexer:
                 max_term_f = value[0]
 
         """
+        docs dic:
+        key = doc name : invert | posting | docs
+        
+        value = the inner dictionary's
+        
         invert dic:
         key = term
 

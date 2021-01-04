@@ -57,19 +57,24 @@ class Searcher:
 
         # TODO - indexer = dictionary of dictionaries
 
-        flag_open = True
-        file_name = ""
+        # flag_open = True
+        # file_name = ""
+
+        # posting_dic = {}
+        posting_dic = self._indexer["posting"]
+        # invert_dic = {}
+        invert_dic = self._indexer["invert"]
 
         for term in query_as_list:
             try:  # an example of checks that you have to do
 
                 upper_term = term.upper()
                 lower_term = term.lower()
-                if term not in self._indexer and lower_term not in self._indexer and upper_term not in self._indexer:
+                if term not in invert_dic and lower_term not in invert_dic and upper_term not in invert_dic:
                     continue
-                if lower_term in self._indexer:
+                if lower_term in invert_dic:
                     term = lower_term
-                elif upper_term in self._indexer:
+                elif upper_term in invert_dic:
                     term = upper_term
 
                 """--------------------------------------Counter of terms in the query-----------------------------------------"""
@@ -81,18 +86,19 @@ class Searcher:
                     self.counter_of_terms[term] = 1
 
                 """--------------------------------------Open and Close posting files-----------------------------------------"""
+                self.relevant_docs[term] = posting_dic[term].keys()
 
-                if self._indexer[term][1] != file_name and not flag_open:
-                    file.close()
-                    flag_open = True
-
-                if flag_open:
-                    file_name = self._indexer[term][1]
-                    with open(file_name, 'rb') as file:
-                        information = dict(pickle.load(file))
-                    flag_open = False
-
-                self.relevant_docs[term] = information[term]
+                # if self._indexer[term][1] != file_name and not flag_open:
+                #     file.close()
+                #     flag_open = True
+                #
+                # if flag_open:
+                #     file_name = self._indexer[term][1]
+                #     with open(file_name, 'rb') as file:
+                #         information = dict(pickle.load(file))
+                #     flag_open = False
+                #
+                # self.relevant_docs[term] = information[term]
 
             except:
                 print('term {} not found in posting'.format(term))

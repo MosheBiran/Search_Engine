@@ -7,7 +7,7 @@ from reader import ReadFile
 from configuration import ConfigClass
 from parser_module import Parse
 from indexer import Indexer
-from searcher_local_method import SearcherLocalMethod
+from searcher import Searcher
 import utils
 
 
@@ -48,7 +48,7 @@ class SearchEngine:
         self._indexer.save_index("idx_bench.pkl")
 
         indexer_dic = utils.load_obj("idx_bench")
-        docs_dic = compute_Wi(indexer_dic)  # TODO - check this shit
+        docs_dic = compute_Wi(indexer_dic)
         indexer_dic["docs"] = docs_dic
         utils.save_obj(indexer_dic, "idx_bench")
 
@@ -87,9 +87,9 @@ class SearchEngine:
             a list of tweet_ids where the first element is the most relavant
             and the last is the least relevant result.
         """
-        searcher = SearcherLocalMethod(self._parser, self._indexer, model=self._model)
-        return searcher.search(query)
 
+        searcher = Searcher(self._parser, self._indexer, model=self._model)
+        return searcher.search(query)
 
 
 

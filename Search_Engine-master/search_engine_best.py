@@ -8,6 +8,7 @@ from configuration import ConfigClass
 from parser_module import Parse
 from indexer import Indexer
 from searcher import Searcher
+from searcher_local_method import SearcherLocalMethod
 import utils
 
 
@@ -37,23 +38,6 @@ class SearchEngine:
         # Iterate over every document in the file
         number_of_documents = 0
 
-        # if self._config is None:
-        #     config = ConfigClass()
-        #     config.set__corpusPath("")
-        #     self._config = config
-
-        # r = ReadFile(corpus_path=self._config.get__corpusPath())
-        # """------------"""
-        # """------------"""
-        # number_of_documents = 0
-        # documents_list = []
-        # for root_path, direc, files_in_dir in os.walk(fn):
-        #     r.set_new_Root(root_path)
-        #     for file in files_in_dir:
-        #         if file.endswith(".parquet"):
-        #             documents_list += r.read_file(file)
-        # Iterate over every document in the file
-
         for idx, document in enumerate(documents_list):
             # parse the document
             parsed_document = self._parser.parse_doc(document)
@@ -68,8 +52,6 @@ class SearchEngine:
         docs_dic = compute_Wi(indexer_dic)  # TODO - check this shit
         indexer_dic["docs"] = docs_dic
         utils.save_obj(indexer_dic, "idx_bench")
-
-
 
 
 
@@ -106,7 +88,12 @@ class SearchEngine:
             a list of tweet_ids where the first element is the most relavant 
             and the last is the least relevant result.
         """
-        searcher = Searcher(self._parser, self._indexer, model=self._model)
+        local_method = False
+        if( local_method ):
+            searcher = SearcherLocalMethod(self._parser, self._indexer, model=self._model)
+        else:
+            searcher = Searcher(self._parser, self._indexer, model=self._model)
+
         return searcher.search(query)
 
 

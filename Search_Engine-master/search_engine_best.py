@@ -51,6 +51,9 @@ class SearchEngine:
         indexer_dic = utils.load_obj("idx_bench")
         docs_dic = compute_Wi(indexer_dic)  # TODO - check this shit
         indexer_dic["docs"] = docs_dic
+
+
+
         utils.save_obj(indexer_dic, "idx_bench")
 
 
@@ -89,7 +92,7 @@ class SearchEngine:
             and the last is the least relevant result.
         """
         local_method = False
-        if( local_method ):
+        if local_method:
             searcher = SearcherLocalMethod(self._parser, self._indexer, model=self._model)
         else:
             searcher = Searcher(self._parser, self._indexer, model=self._model)

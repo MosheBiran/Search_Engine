@@ -48,8 +48,16 @@ class SearchEngine:
         self._indexer.save_index("idx_bench.pkl")
 
         indexer_dic = utils.load_obj("idx_bench")
-        docs_dic = compute_Wi(indexer_dic)
-        indexer_dic["docs"] = docs_dic
+
+        globalMethod = True
+        if globalMethod:
+            docs_dic, Sij_dic = compute_Wi(indexer_dic, globalMethod)
+            indexer_dic["docs"] = docs_dic
+            indexer_dic["sij"] = Sij_dic
+        else:
+            docs_dic = compute_Wi(indexer_dic)
+            indexer_dic["docs"] = docs_dic
+
         utils.save_obj(indexer_dic, "idx_bench")
 
 
@@ -136,15 +144,21 @@ def main(corpus_path, output_path, queries, k):
         print("**************************\n")
 
 
-def compute_Wi(indexer):
+def compute_Wi(indexer, globalMethod=None):
 
     information = indexer["docs"]
     invert = indexer["invert"]
+
+    if globalMethod is not None:
+        Cij_dic = {}
 
     for key, value in information.items():
 
         to_remove = []
         to_change = {}
+
+        if globalMethod is not None:
+            tweet_copy = {}
 
         for k, v in value[0].items():
 
@@ -163,6 +177,9 @@ def compute_Wi(indexer):
             else:
                 term = k
 
+            if globalMethod is not None:
+                tweet_copy[term] = value[0][k]
+
             tf = v / value[1]
             idf = math.log2(len(indexer["docs"]) / invert[term])
             tf_idf = round(tf * idf, 3)
@@ -176,5 +193,30 @@ def compute_Wi(indexer):
         for old, new in to_change.items():
             value[0][new] = value[0].pop(old)
 
-    return information
+        if globalMethod is not None:
+            for term1, frq1 in tweet_copy.items():
+                for term2, frq2 in tweet_copy.items():
 
+                    key = (term1, term2)
+                    if key not in Cij_dic:
+                        Cij_dic[key] = frq1*frq2
+                    else:
+                        Cij_dic[key] += frq1*frq2
+
+    if globalMethod is None:
+        return information
+
+    else:
+        Sij_dic = {}
+        for Sij, value in Cij_dic.items():
+            if Sij[0] == Sij[1]:
+                continue
+            Cii = (Sij[0], Sij[0])
+            Cjj = (Sij[1], Sij[1])
+            Sij_dic[Sij] = Cij_dic[Sij] / (Cij_dic[Cii] + Cij_dic[Cjj] - Cij_dic[Sij])
+            if Sij_dic[Sij] > 1:
+                print("Sij Global More Then 1 !!!!!")  # TODO - Remove
+
+        Sij_dic = dict(sorted(Sij_dic.items(), key=lambda e: e[1], reverse=True))
+
+        return information, Sij_dic

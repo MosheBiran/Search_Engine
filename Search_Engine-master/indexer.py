@@ -26,22 +26,6 @@ class Indexer:
         :return: -
         """
 
-        # document_dictionary = document.term_doc_dictionary
-        # # Go over each term in the doc
-        # for term in document_dictionary.keys():
-        #     try:
-        #         # Update inverted index and posting
-        #         if term not in self.inverted_idx.keys():
-        #             self.inverted_idx[term] = 1
-        #             self.postingDict[term] = []
-        #         else:
-        #             self.inverted_idx[term] += 1
-        #
-        #         self.postingDict[term].append((document.tweet_id, document_dictionary[term]))
-        #
-        #     except:
-        #         print('problem with the following key {}'.format(term[0]))
-
         max_term_f = 0
         doc_len = 0
         unique_terms = 0

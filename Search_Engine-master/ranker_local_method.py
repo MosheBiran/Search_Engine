@@ -56,17 +56,17 @@ class RankerLocalMethod:
                     tweet_id_CosSim[key][0] += tf_idf * term_f
                     tweet_id_CosSim[key][1] += term_f ** 2
 
-                elif term.lower() in value[0]:
-                    tf_idf = value[0][term.lower()]
-                    term_f = counter_of_terms[term]
-                    tweet_id_CosSim[key][0] += tf_idf * term_f
-                    tweet_id_CosSim[key][1] += term_f ** 2
-
-                elif term.upper() in value[0]:
-                    tf_idf = value[0][term.upper()]
-                    term_f = counter_of_terms[term]
-                    tweet_id_CosSim[key][0] += tf_idf * term_f
-                    tweet_id_CosSim[key][1] += term_f ** 2
+                # elif term.lower() in value[0]:
+                #     tf_idf = value[0][term.lower()]
+                #     term_f = counter_of_terms[term]
+                #     tweet_id_CosSim[key][0] += tf_idf * term_f
+                #     tweet_id_CosSim[key][1] += term_f ** 2
+                #
+                # elif term.upper() in value[0]:
+                #     tf_idf = value[0][term.upper()]
+                #     term_f = counter_of_terms[term]
+                #     tweet_id_CosSim[key][0] += tf_idf * term_f
+                #     tweet_id_CosSim[key][1] += term_f ** 2
 
 
 
@@ -130,17 +130,17 @@ class RankerLocalMethod:
                     tweet_id_CosSim[key][0] += tf_idf * term_f
                     tweet_id_CosSim[key][1] += term_f ** 2
 
-                elif term.lower() in value[0]:
-                    tf_idf = value[0][term.lower()]
-                    term_f = counter_of_terms[term]
-                    tweet_id_CosSim[key][0] += tf_idf * term_f
-                    tweet_id_CosSim[key][1] += term_f ** 2
-
-                elif term.upper() in value[0]:
-                    tf_idf = value[0][term.upper()]
-                    term_f = counter_of_terms[term]
-                    tweet_id_CosSim[key][0] += tf_idf * term_f
-                    tweet_id_CosSim[key][1] += term_f ** 2
+                # elif term.lower() in value[0]:
+                #     tf_idf = value[0][term.lower()]
+                #     term_f = counter_of_terms[term]
+                #     tweet_id_CosSim[key][0] += tf_idf * term_f
+                #     tweet_id_CosSim[key][1] += term_f ** 2
+                #
+                # elif term.upper() in value[0]:
+                #     tf_idf = value[0][term.upper()]
+                #     term_f = counter_of_terms[term]
+                #     tweet_id_CosSim[key][0] += tf_idf * term_f
+                #     tweet_id_CosSim[key][1] += term_f ** 2
 
             inner_p = tweet_id_CosSim[key][0]
             norm = math.sqrt(tweet_id_data[key][2] * query_norma)

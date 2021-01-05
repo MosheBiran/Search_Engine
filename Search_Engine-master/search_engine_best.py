@@ -163,14 +163,17 @@ def compute_Wi(indexer):
     for key, value in information.items():
 
         to_remove = []
+        to_change = {}
 
         for k, v in value[0].items():
 
             if k not in invert and k.upper() in invert:
                 term = k.upper()
+                to_change[k] = term
 
             elif k not in invert and k.lower() in invert:
                 term = k.lower()
+                to_change[k] = term
 
             elif k not in invert:
                 to_remove.append(k)
@@ -188,6 +191,9 @@ def compute_Wi(indexer):
 
         for k in to_remove:
             del value[0][k]
+
+        for old, new in to_change.items():
+            value[0][new] = value[0].pop(old)
 
     return information
 

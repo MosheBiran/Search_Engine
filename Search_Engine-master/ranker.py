@@ -55,17 +55,17 @@ class Ranker:
                     tweet_id_CosSim[key][0] += tf_idf * term_f
                     tweet_id_CosSim[key][1] += term_f ** 2
 
-                elif term.lower() in value[0]:
-                    tf_idf = value[0][term.lower()]
-                    term_f = counter_of_terms[term]
-                    tweet_id_CosSim[key][0] += tf_idf * term_f
-                    tweet_id_CosSim[key][1] += term_f ** 2
-
-                elif term.upper() in value[0]:
-                    tf_idf = value[0][term.upper()]
-                    term_f = counter_of_terms[term]
-                    tweet_id_CosSim[key][0] += tf_idf * term_f
-                    tweet_id_CosSim[key][1] += term_f ** 2
+                # elif term.lower() in value[0]:
+                #     tf_idf = value[0][term.lower()]
+                #     term_f = counter_of_terms[term]
+                #     tweet_id_CosSim[key][0] += tf_idf * term_f
+                #     tweet_id_CosSim[key][1] += term_f ** 2
+                #
+                # elif term.upper() in value[0]:
+                #     tf_idf = value[0][term.upper()]
+                #     term_f = counter_of_terms[term]
+                #     tweet_id_CosSim[key][0] += tf_idf * term_f
+                #     tweet_id_CosSim[key][1] += term_f ** 2
 
 
 
@@ -74,6 +74,7 @@ class Ranker:
             cos_sim = round(inner_p / norm, 3)
             if cos_sim > 1:
                 x = 1
+                print("******* CosSim more then 1 !!!!! *******")
                 raise TypeError  # TODO - Remove!!!
             tweet_id_CosSim[key][2] = cos_sim
 

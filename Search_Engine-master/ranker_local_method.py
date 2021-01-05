@@ -75,6 +75,7 @@ class RankerLocalMethod:
             cos_sim = round(inner_p / norm, 3)
             if cos_sim > 1:
                 x = 1
+                print("******* CosSim more then 1 !!!!! *******")
                 raise TypeError
             tweet_id_CosSim[key][2] = cos_sim
 
@@ -146,11 +147,12 @@ class RankerLocalMethod:
             cos_sim = round(inner_p / norm, 3)
             if cos_sim > 1:
                 x = 1
+                print("******* CosSim more then 1 !!!!! *******")
                 raise TypeError  # TODO - Remove!!!
             tweet_id_CosSim[key][2] = cos_sim
 
         # res = sorted(tweet_id_CosSim.items(), key=lambda e: e[1][2], reverse=True)  # original
-        sorted_cos_sim = dict(sorted(tweet_id_CosSim.items(), key=lambda e: e[1][2], reverse=True)[:50])  # for test
+        sorted_cos_sim = dict(sorted(tweet_id_CosSim.items(), key=lambda e: e[1][2], reverse=True)[:200])  # for test
 
         """--------------------------------------Init Association Matrix-----------------------------------------"""
         association_matrix = {}  # key = term_term ___ value = Cij
@@ -170,6 +172,7 @@ class RankerLocalMethod:
                         else:
                             association_matrix[Cij] += val1 * val2
 
+
         """--------------------------------------Normalized Association Matrix-----------------------------------------"""
 
         association_matrix_sij = {}
@@ -178,8 +181,11 @@ class RankerLocalMethod:
             if Sij[0] != Sij[1]:
                 Cii = (Sij[0], Sij[0])
                 Cjj = (Sij[1], Sij[1])
-                association_matrix_sij[Sij] = association_matrix[Sij] / (
-                        association_matrix[Cii] + association_matrix[Cjj] - association_matrix[Sij])
+                association_matrix_sij[Sij] = association_matrix[Sij] / (association_matrix[Cii] + association_matrix[Cjj] - association_matrix[Sij])
+                if association_matrix_sij[Sij] > 1:
+                    x = 0
+                    print("******* Sij more then 1 !!!!! *******")
+                    raise TypeError
 
         association_matrix_sij = dict(sorted(association_matrix_sij.items(), key=lambda e: e[1], reverse=True))
 
@@ -189,10 +195,13 @@ class RankerLocalMethod:
 
         lst_of_word_to_add = []
         for key in association_matrix_sij.keys():
+            if association_matrix_sij[key] < 0.49 and len(lst_of_word_to_add) > 1:
+                break
             if len(copy_of_term.keys()) == 0:
                 break
             if key[0] in copy_of_term.keys():
-                lst_of_word_to_add.append(key[1])
+                if key[1] not in counter_of_terms and key[1] not in lst_of_word_to_add:
+                    lst_of_word_to_add.append(key[1])
                 del copy_of_term[key[0]]
 
         return lst_of_word_to_add

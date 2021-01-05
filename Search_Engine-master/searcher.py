@@ -16,6 +16,9 @@ class Searcher:
         self._ranker = Ranker(indexer_dic["posting"], indexer_dic["docs"])
         self._model = model
 
+        self.posting_dic = indexer_dic["posting"]
+        self.invert_dic = indexer_dic["invert"]
+
         self.relevant_docs = {}
         self.counter_of_terms = {}
         self.unique_tweets_num = set()
@@ -63,21 +66,17 @@ class Searcher:
         # flag_open = True
         # file_name = ""
 
-        # posting_dic = {}
-        posting_dic = self._indexer.load_index("idx_bench.pkl")["posting"]
-        # invert_dic = {}
-        invert_dic = self._indexer.load_index("idx_bench.pkl")["invert"]
 
         for term in query_as_list:
             try:  # an example of checks that you have to do
 
                 upper_term = term.upper()
                 lower_term = term.lower()
-                if term not in invert_dic and lower_term not in invert_dic and upper_term not in invert_dic:
+                if term not in self.invert_dic and lower_term not in self.invert_dic and upper_term not in self.invert_dic:
                     continue
-                if lower_term in invert_dic:
+                if lower_term in self.invert_dic:
                     term = lower_term
-                elif upper_term in invert_dic:
+                elif upper_term in self.invert_dic:
                     term = upper_term
 
                 """--------------------------------------Counter of terms in the query-----------------------------------------"""
@@ -89,8 +88,8 @@ class Searcher:
                     self.counter_of_terms[term] = 1
 
                 """--------------------------------------Open and Close posting files-----------------------------------------"""
-                self.relevant_docs[term] = posting_dic[term]
-                self.unique_tweets_num.update(set(list(posting_dic[term].keys())))
+                self.relevant_docs[term] = self.posting_dic[term]
+                self.unique_tweets_num.update(set(list(self.posting_dic[term].keys())))
 
                 # if self._indexer[term][1] != file_name and not flag_open:
                 #     file.close()

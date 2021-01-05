@@ -41,11 +41,11 @@ class SearcherLocalMethod:
 
         lst_before_extend = self._relevant_docs_from_posting(query_as_list)
 
-        # n_relevant = len(relevant_docs) #original
+        # n_relevant = len(relevant_docs) # original2
 
         add_to_query = RankerLocalMethod.compute_extend_word(self._ranker, lst_before_extend)  # TODO - what about k
 
-        query_as_list.extend(add_to_query)  # TODO - improve
+        query_as_list.extend(add_to_query)  # TODO - Maybe improve
 
         self.counter_of_terms.clear()
         self.unique_tweets_num = set()

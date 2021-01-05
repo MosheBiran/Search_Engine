@@ -24,7 +24,6 @@ class Ranker:
         relevant_doc = relevant_docs[0]  # the posting dic of all terms of the query
 
         """--------------------------------------Getting ALL Relevant Tweet ID-----------------------------------------"""
-
         tweet_id_data = {}
         tweet_id_CosSim = {}
 
@@ -33,6 +32,19 @@ class Ranker:
                 if v not in tweet_id_data:
                     tweet_id_data[v] = 0
                     tweet_id_CosSim[v] = [0, 0, 0]
+
+        """--------------------------------------improved Searcher-----------------------------------------"""
+
+        # tweet_id_data = {}
+        # tweet_id_CosSim = {}
+        #
+        # for value in relevant_doc.keys():
+        #     if value not in tweet_id_data:
+        #         tweet_id_data[value] = 0
+        #         tweet_id_CosSim[value] = [0, 0, 0]
+        #     else:
+        #         x = 1
+        #         print("2 same tweets")
 
         """-------------------------------------Read All Tweets info-----------------------------------------"""
         # TODO - Maybe Threads
@@ -55,19 +67,6 @@ class Ranker:
                     tweet_id_CosSim[key][0] += tf_idf * term_f
                     tweet_id_CosSim[key][1] += term_f ** 2
 
-                # elif term.lower() in value[0]:
-                #     tf_idf = value[0][term.lower()]
-                #     term_f = counter_of_terms[term]
-                #     tweet_id_CosSim[key][0] += tf_idf * term_f
-                #     tweet_id_CosSim[key][1] += term_f ** 2
-                #
-                # elif term.upper() in value[0]:
-                #     tf_idf = value[0][term.upper()]
-                #     term_f = counter_of_terms[term]
-                #     tweet_id_CosSim[key][0] += tf_idf * term_f
-                #     tweet_id_CosSim[key][1] += term_f ** 2
-
-
 
             inner_p = tweet_id_CosSim[key][0]
             norm = math.sqrt(tweet_id_data[key][2] * query_norma)
@@ -76,19 +75,13 @@ class Ranker:
                 x = 1
                 print("******* CosSim more then 1 !!!!! *******")
                 raise TypeError  # TODO - Remove!!!
+
             tweet_id_CosSim[key][2] = cos_sim
 
-        # res = sorted(tweet_id_CosSim.items(), key=lambda e: e[1][2], reverse=True)  # original
         res = dict(sorted(tweet_id_CosSim.items(), key=lambda e: e[1][2], reverse=True))  # for test
         res2 = list(res.keys())
 
         return res2
 
 
-
-
-        # ranked_results = sorted(relevant_docs.items(), key=lambda item: item[1], reverse=True)
-        # if k is not None:
-        #     ranked_results = ranked_results[:k]
-        # return [d[0] for d in ranked_results]
 

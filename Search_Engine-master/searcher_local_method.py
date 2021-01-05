@@ -18,6 +18,7 @@ class SearcherLocalMethod:
 
         self.posting_dic = indexer_dic["posting"]
         self.invert_dic = indexer_dic["invert"]
+        self.doc_dic = indexer_dic["docs"]
 
         self.relevant_docs = {}
         self.counter_of_terms = {}
@@ -41,8 +42,6 @@ class SearcherLocalMethod:
 
         lst_before_extend = self._relevant_docs_from_posting(query_as_list)
 
-        # n_relevant = len(relevant_docs) # original2
-
         add_to_query = RankerLocalMethod.compute_extend_word(self._ranker, lst_before_extend)  # TODO - what about k
 
         query_as_list.extend(add_to_query)  # TODO - Maybe improve
@@ -57,8 +56,9 @@ class SearcherLocalMethod:
         ranked_doc_ids = RankerLocalMethod.rank_relevant_docs(self._ranker, lst_After_extend)  # TODO - what about k
 
 
+        return len(ranked_doc_ids), ranked_doc_ids
 
-        return len(self.unique_tweets_num), ranked_doc_ids
+        # return len(lst_After_extend[0]), ranked_doc_ids # improved searcher
         # return n_relevant, ranked_doc_ids  # original
         # return ranked_doc_ids  # not test
 
@@ -70,18 +70,6 @@ class SearcherLocalMethod:
         :param query_as_list: parsed query tokens
         :return: dictionary of relevant documents mapping doc_id to document frequency.
         """
-        # relevant_docs = {}
-        # for term in query_as_list:
-        #     posting_list = self._indexer.get_term_posting_list(term)
-        #     for doc_id, tf in posting_list:
-        #         df = relevant_docs.get(doc_id, 0)
-        #         relevant_docs[doc_id] = df + 1
-        # return relevant_docs
-
-
-        # flag_open = True
-        # file_name = ""
-
 
         for term in query_as_list:
             try:  # an example of checks that you have to do
@@ -107,20 +95,77 @@ class SearcherLocalMethod:
                 self.relevant_docs[term] = self.posting_dic[term]
                 self.unique_tweets_num.update(set(list(self.posting_dic[term].keys())))
 
-                # if self._indexer[term][1] != file_name and not flag_open:
-                #     file.close()
-                #     flag_open = True
-                #
-                # if flag_open:
-                #     file_name = self._indexer[term][1]
-                #     with open(file_name, 'rb') as file:
-                #         information = dict(pickle.load(file))
-                #     flag_open = False
-                #
-                # self.relevant_docs[term] = information[term]
 
             except:
                 print('term {} not found in posting'.format(term))
 
+        """--------------------------------------improved Searcher-----------------------------------------"""
+
+        # for term1 in query_as_list:
+        #     for term2 in query_as_list:
+        #         try:
+        #
+        #             if term1 == term2:
+        #                 continue
+        #
+        #             upper_term1 = term1.upper()
+        #             lower_term1 = term1.lower()
+        #             upper_term2 = term2.upper()
+        #             lower_term2 = term2.lower()
+        #
+        #             if term1 not in self.invert_dic and lower_term1 not in self.invert_dic and upper_term1 not in self.invert_dic:
+        #                 continue
+        #             if lower_term1 in self.invert_dic:
+        #                 term1 = lower_term1
+        #             elif upper_term1 in self.invert_dic:
+        #                 term1 = upper_term1
+        #
+        #             if term2 not in self.invert_dic and lower_term2 not in self.invert_dic and upper_term2 not in self.invert_dic:
+        #                 continue
+        #
+        #             if lower_term2 in self.invert_dic:
+        #                 term2 = lower_term2
+        #
+        #             elif upper_term2 in self.invert_dic:
+        #                 term2 = upper_term2
+        #
+        #             if term1 in self.invert_dic and term2 in self.invert_dic:
+        #
+        #                 if term1 in self.relevant_docs.keys():
+        #                     self.counter_of_terms[term1] += 1
+        #                     continue
+        #                 else:
+        #                     self.counter_of_terms[term1] = 1
+        #
+        #                 self.relevant_docs[term1] = self.posting_dic[term1]
+        #                 self.unique_tweets_num.update(set(list(self.posting_dic[term1].keys())))
+        #                 break
+        #
+        #
+        #         except:
+        #             print('term {} not found in posting'.format(term1))
+        #
+        # final = {}
+        #
+        # for id in self.unique_tweets_num:
+        #     tweet = self.doc_dic[id][0]
+        #     for term1 in self.counter_of_terms:
+        #         for term2 in self.counter_of_terms:
+        #
+        #             if term1 == term2:
+        #                 continue
+        #
+        #             if term1 in tweet and term2 in tweet:
+        #                 final[id] = 0
+        #
+        #
+        #
+        # return [final, self.counter_of_terms]
 
         return [self.relevant_docs, self.counter_of_terms]
+
+
+
+
+
+

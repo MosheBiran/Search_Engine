@@ -25,34 +25,40 @@ class Ranker:
         relevant_doc = relevant_docs[0]  # the posting dic of all terms of the query
 
         """--------------------------------------Getting ALL Relevant Tweet ID-----------------------------------------"""
-        tweet_id_data = {}
-        tweet_id_CosSim = {}
-
-        for value in relevant_doc.values():
-            for v in value.keys():
-                if v not in tweet_id_data:
-                    tweet_id_data[v] = 0
-                    tweet_id_CosSim[v] = [0, 0, 0]
-
-        """--------------------------------------improved Searcher-----------------------------------------"""
-
         # tweet_id_data = {}
         # tweet_id_CosSim = {}
         #
-        # for value in relevant_doc.keys():
-        #     if value not in tweet_id_data:
-        #         tweet_id_data[value] = 0
-        #         tweet_id_CosSim[value] = [0, 0, 0]
-        #     else:
-        #         x = 1
-        #         print("2 same tweets")
+        # tweet_id_data.clear()
+        # tweet_id_CosSim.clear()
+        #
+        # for value in relevant_doc.values():
+        #     for v in value.keys():
+        #         if v not in tweet_id_data:
+        #             tweet_id_data[v] = self.docs_dic[v]
+        #             tweet_id_CosSim[v] = [0, 0, 0]
+
+        """--------------------------------------improved Searcher-----------------------------------------"""
+
+        tweet_id_data = {}
+        tweet_id_CosSim = {}
+
+        tweet_id_data.clear()
+        tweet_id_CosSim.clear()
+
+        for value in relevant_doc:
+            if value not in tweet_id_data:
+                tweet_id_data[value] = self.docs_dic[value]
+                tweet_id_CosSim[value] = [0, 0, 0]
+            else:
+                x = 1
+                print("2 same tweets")
 
         """-------------------------------------Read All Tweets info-----------------------------------------"""
         # TODO - Maybe Threads
         # TODO - Maybe don't need tweet_id_data
 
-        for key in tweet_id_data.keys():
-            tweet_id_data[key] = self.docs_dic[key]
+        # for key in tweet_id_data.keys():
+        #     tweet_id_data[key] = self.docs_dic[key]
 
         """--------------------------------------Cos - Sim-----------------------------------------"""
 
@@ -62,7 +68,7 @@ class Ranker:
 
         for key, value in tweet_id_data.items():
             for term in counter_of_terms.keys():
-                if term in value[0]:  # TODO - term -lower\upper check
+                if term in value[0]:
                     tf_idf = value[0][term]
                     term_f = counter_of_terms[term]
                     tweet_id_CosSim[key][0] += tf_idf * term_f
@@ -94,37 +100,41 @@ class Ranker:
 
         """--------------------------------------Getting ALL Relevant Tweet ID-----------------------------------------"""
 
-        tweet_id_data = {}
-        tweet_id_CosSim = {}
+        # tweet_id_data = {}
+        # tweet_id_CosSim = {}
+        #
+        # for value in relevant_doc.values():
+        #     for v in value.keys():
+        #         if v not in tweet_id_data:
+        #             tweet_id_data[v] = self.docs_dic[v]
+        #             tweet_id_CosSim[v] = [0, 0, 0]
 
-        for value in relevant_doc.values():
-            for v in value.keys():
-                if v not in tweet_id_data:
-                    tweet_id_data[v] = 0
-                    tweet_id_CosSim[v] = [0, 0, 0]
 
 
 
         """--------------------------------------improved Searcher-----------------------------------------"""
 
-        # tweet_id_data = {}
-        # tweet_id_CosSim = {}
-        #
-        # for value in relevant_doc.keys():
-        #     if value not in tweet_id_data:
-        #         tweet_id_data[value] = 0
-        #         tweet_id_CosSim[value] = [0, 0, 0]
-        #     else:
-        #         x = 1
-        #         print("2 same tweets")
+        tweet_id_data = {}
+        tweet_id_CosSim = {}
+
+        tweet_id_data.clear()
+        tweet_id_CosSim.clear()
+
+        for value in relevant_doc:
+            if value not in tweet_id_data:
+                tweet_id_data[value] = self.docs_dic[value]
+                tweet_id_CosSim[value] = [0, 0, 0]
+            else:
+                x = 1
+                print("2 same tweets")
 
 
         """-------------------------------------Read All Tweets info-----------------------------------------"""
         # TODO - Maybe Threads
         # TODO - Maybe don't need tweet_id_data
 
-        for key in tweet_id_data.keys():
-            tweet_id_data[key] = self.docs_dic[key]
+        # for key in tweet_id_data.keys():
+        #     tweet_id_data[key] = self.docs_dic[key]
 
         """--------------------------------------Cos - Sim-----------------------------------------"""
 

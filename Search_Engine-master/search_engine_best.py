@@ -49,9 +49,9 @@ class SearchEngine:
 
         indexer_dic = utils.load_obj("idx_bench")
 
-        localMethod = False
-        globalMethod = False
-        wordNet = False
+        localMethod = True
+        globalMethod = True
+        wordNet = True
 
         if localMethod:
             indexer_dic["local"] = True

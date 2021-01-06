@@ -98,6 +98,9 @@ class Searcher:
         relevant_docs = self._relevant_docs_from_posting(query_as_list)
         ranked_doc_ids = Ranker.rank_relevant_docs(self._ranker, relevant_docs)  # TODO - what about k
 
+        # if len(ranked_doc_ids) > 2000:
+        #     x = 2000
+        #     return x, ranked_doc_ids[:2000]
 
         return len(ranked_doc_ids), ranked_doc_ids
 

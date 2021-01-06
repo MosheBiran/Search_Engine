@@ -8,7 +8,6 @@ from configuration import ConfigClass
 from parser_module import Parse
 from indexer import Indexer
 from searcher import Searcher
-from searcher_local_method import SearcherLocalMethod
 import utils
 
 
@@ -50,11 +49,20 @@ class SearchEngine:
 
         indexer_dic = utils.load_obj("idx_bench")
 
+        localMethod = False
         globalMethod = False
+        wordNet = True
+
+        if localMethod:
+            indexer_dic["local"] = True
+
+        if wordNet:
+            indexer_dic["wordnet"] = True
+
         if globalMethod:
             docs_dic, Sij_dic = compute_Wi(indexer_dic, globalMethod)
             indexer_dic["docs"] = docs_dic
-            indexer_dic["sij"] = Sij_dic
+            indexer_dic["global"] = Sij_dic
         else:
             docs_dic = compute_Wi(indexer_dic)
             indexer_dic["docs"] = docs_dic
@@ -96,58 +104,52 @@ class SearchEngine:
             a list of tweet_ids where the first element is the most relavant
             and the last is the least relevant result.
         """
-        local_method = False
-        if local_method:
-            searcher = SearcherLocalMethod(self._parser, self._indexer, model=self._model)
-        else:
-            searcher = Searcher(self._parser, self._indexer, model=self._model)
 
+        searcher = Searcher(self._parser, self._indexer, model=self._model)
         return searcher.search(query)
 
 
-
-
-def main(corpus_path, output_path, queries, k):
-
-    timeOfBuild = time.time()
-
-    config = ConfigClass()
-    config.set__corpusPath(corpus_path)
-    config.set__outputPath(output_path)
-
-    searchEngine = SearchEngine(config)
-    searchEngine.build_index_from_parquet(corpus_path)
-
-
-
-
-    print("Time To Build The Engine :%.2f" % ((time.time() - timeOfBuild) / 60) + '\n\r')
-
-    query_counter = 0
-
-    if type(queries) is list:  # TODO - maybe remove
-        Lines = queries
-
-    else:
-        Lines = []
-        with open(queries, 'rb') as fp:
-            line = fp.readline()
-            while line:
-                if line.decode().strip():
-                    Lines.append(line.decode().strip())
-                line = fp.readline()
-
-    for query in Lines:
-        query_counter += 1
-
-        print("Query Number : " + str(query_counter))  # TODO - Remove
-        start = time.time()
-
-        for doc_tuple in searchEngine.search(query):
-            print('Tweet id: {} Score: {}'.format(doc_tuple[0], doc_tuple[1][2]))
-
-        print("Query time :%.2f" % ((time.time() - start) / 60) + '\n\r')
-        print("**************************\n")
+# def main(corpus_path, output_path, queries, k):
+#
+#     timeOfBuild = time.time()
+#
+#     config = ConfigClass()
+#     config.set__corpusPath(corpus_path)
+#     config.set__outputPath(output_path)
+#
+#     searchEngine = SearchEngine(config)
+#     searchEngine.build_index_from_parquet(corpus_path)
+#
+#
+#
+#
+#     print("Time To Build The Engine :%.2f" % ((time.time() - timeOfBuild) / 60) + '\n\r')
+#
+#     query_counter = 0
+#
+#     if type(queries) is list:  # TODO - maybe remove
+#         Lines = queries
+#
+#     else:
+#         Lines = []
+#         with open(queries, 'rb') as fp:
+#             line = fp.readline()
+#             while line:
+#                 if line.decode().strip():
+#                     Lines.append(line.decode().strip())
+#                 line = fp.readline()
+#
+#     for query in Lines:
+#         query_counter += 1
+#
+#         print("Query Number : " + str(query_counter))  # TODO - Remove
+#         start = time.time()
+#
+#         for doc_tuple in searchEngine.search(query):
+#             print('Tweet id: {} Score: {}'.format(doc_tuple[0], doc_tuple[1][2]))
+#
+#         print("Query time :%.2f" % ((time.time() - start) / 60) + '\n\r')
+#         print("**************************\n")
 
 
 def compute_Wi(indexer, globalMethod=None):

@@ -23,14 +23,26 @@ class Searcher:
         self.invert_dic = indexer_dic["invert"]
         self.doc_dic = indexer_dic["docs"]
 
-        if "sij" in indexer_dic:
-            self.Sij_dic = indexer_dic["sij"]
+        if "global" in indexer_dic:
+            self.Sij_dic = indexer_dic["global"]
         else:
             self.Sij_dic = None
+
+        if "wordnet" in indexer_dic:
+            self.word_net = True
+        else:
+            self.word_net = False
+
+        if "local" in indexer_dic:
+            self.local = True
+        else:
+            self.local = False
+
 
         self.relevant_docs = {}
         self.counter_of_terms = {}
         self.unique_tweets_num = set()
+
 
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.
@@ -48,28 +60,47 @@ class Searcher:
         """
         query_as_list = self._parser.parse_sentence(query)
 
-        expend = []
-        for term in query_as_list:
-            res = self.WordNet(term, query_as_list)
-            if res is not None:
-                expend.append(res)
-
-        if len(expend) != 0:
-            query_as_list.extend(expend)
 
         if self.Sij_dic is not None:
             query_as_list.extend(self.expand_query_global_method(query_as_list))
 
 
+        if self.word_net:
+            expend = []
+            for term in query_as_list:
+                res = self.WordNet(term, query_as_list)
+                if res is not None:
+                    expend.append(res)
+
+            if len(expend) != 0:
+                query_as_list.extend(expend)
+
+
+        if self.local:
+            lst_before_extend = self._relevant_docs_from_posting(query_as_list)
+
+            add_to_query = Ranker.compute_extend_word(self._ranker, lst_before_extend)  # TODO - what about k
+
+            query_as_list.extend(add_to_query)  # TODO - Maybe improve
+
+            self.counter_of_terms.clear()
+            self.unique_tweets_num = set()
+            self.relevant_docs.clear()
+
+            lst_After_extend = self._relevant_docs_from_posting(query_as_list)
+
+            ranked_doc_ids = Ranker.rank_relevant_docs(self._ranker, lst_After_extend)  # TODO - what about k
+
+            return len(ranked_doc_ids), ranked_doc_ids
+
+
+
         relevant_docs = self._relevant_docs_from_posting(query_as_list)
-        # n_relevant = len(relevant_docs) #original
         ranked_doc_ids = Ranker.rank_relevant_docs(self._ranker, relevant_docs)  # TODO - what about k
 
 
         return len(ranked_doc_ids), ranked_doc_ids
 
-        # return n_relevant, ranked_doc_ids  # original
-        # return ranked_doc_ids  # not test
 
     # feel free to change the signature and/or implementation of this function
     # or drop altogether.
@@ -86,14 +117,7 @@ class Searcher:
                 upper_term = term.upper()
                 lower_term = term.lower()
                 if term not in self.invert_dic and lower_term not in self.invert_dic and upper_term not in self.invert_dic:
-                    Word_Net = False
-                    if Word_Net:
-                        res = self.WordNet(term, query_as_list)
-                        if res is None:
-                            continue
-                        term = res
-                    else:
-                        continue
+                    continue
                 elif lower_term in self.invert_dic:
                     term = lower_term
                 elif upper_term in self.invert_dic:

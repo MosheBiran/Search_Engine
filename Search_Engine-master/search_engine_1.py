@@ -3,8 +3,6 @@ import os
 import time
 
 import pandas as pd
-from reader import ReadFile
-from configuration import ConfigClass
 from parser_module import Parse
 from indexer import Indexer
 from searcher import Searcher
@@ -108,48 +106,6 @@ class SearchEngine:
         searcher = Searcher(self._parser, self._indexer, model=self._model)
         return searcher.search(query)
 
-
-# def main(corpus_path, output_path, queries, k):
-#
-#     timeOfBuild = time.time()
-#
-#     config = ConfigClass()
-#     config.set__corpusPath(corpus_path)
-#     config.set__outputPath(output_path)
-#
-#     searchEngine = SearchEngine(config)
-#     searchEngine.build_index_from_parquet(corpus_path)
-#
-#
-#
-#
-#     print("Time To Build The Engine :%.2f" % ((time.time() - timeOfBuild) / 60) + '\n\r')
-#
-#     query_counter = 0
-#
-#     if type(queries) is list:  # TODO - maybe remove
-#         Lines = queries
-#
-#     else:
-#         Lines = []
-#         with open(queries, 'rb') as fp:
-#             line = fp.readline()
-#             while line:
-#                 if line.decode().strip():
-#                     Lines.append(line.decode().strip())
-#                 line = fp.readline()
-#
-#     for query in Lines:
-#         query_counter += 1
-#
-#         print("Query Number : " + str(query_counter))  # TODO - Remove
-#         start = time.time()
-#
-#         for doc_tuple in searchEngine.search(query):
-#             print('Tweet id: {} Score: {}'.format(doc_tuple[0], doc_tuple[1][2]))
-#
-#         print("Query time :%.2f" % ((time.time() - start) / 60) + '\n\r')
-#         print("**************************\n")
 
 
 def compute_Wi(indexer, globalMethod=None):

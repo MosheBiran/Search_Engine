@@ -128,6 +128,7 @@ class Parse:
         #         lst_after_stem.append(w)
         #     return lst_after_stem
 
+        after_parse_lst = [x for x in after_parse_lst if x not in self.stop_words and x not in self.punc]
         return after_parse_lst
 
     def parse_doc(self, doc_as_list):

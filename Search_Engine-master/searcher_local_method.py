@@ -2,6 +2,7 @@ import copy
 
 from ranker_local_method import RankerLocalMethod
 import utils
+from nltk.corpus import wordnet
 
 
 # DO NOT MODIFY CLASS NAME
@@ -47,6 +48,15 @@ class SearcherLocalMethod:
         """
         query_as_list = self._parser.parse_sentence(query)
 
+        expend = []
+        for term in query_as_list:
+            res = self.WordNet(term, query_as_list)
+            if res is not None:
+                expend.append(res)
+
+        if len(expend) != 0:
+            query_as_list.extend(expend)
+
         if self.Sij_dic is not None:
             query_as_list.extend(self.expand_query_global_method(query_as_list))
 
@@ -87,8 +97,15 @@ class SearcherLocalMethod:
                 upper_term = term.upper()
                 lower_term = term.lower()
                 if term not in self.invert_dic and lower_term not in self.invert_dic and upper_term not in self.invert_dic:
-                    continue
-                if lower_term in self.invert_dic:
+                    Word_Net = False
+                    if Word_Net:
+                        res = self.WordNet(term, query_as_list)
+                        if res is None:
+                            continue
+                        term = res
+                    else:
+                        continue
+                elif lower_term in self.invert_dic:
                     term = lower_term
                 elif upper_term in self.invert_dic:
                     term = upper_term
@@ -209,8 +226,16 @@ class SearcherLocalMethod:
 
         return lst_of_word_to_add
 
+    def WordNet(self, term, query_as_list):
+        syns_for_term = wordnet.synsets(term)
+        for syns in syns_for_term:
+            lemmas = set(syns._lemma_names)
+            for lemma in lemmas:
+                if lemma not in query_as_list and lemma in self.invert_dic:
+                    return lemma
+                elif lemma.upper() not in query_as_list and lemma.upper() in self.invert_dic:
+                    return lemma.upper()
+                elif lemma.lower() not in query_as_list and lemma.lower() in self.invert_dic:
+                    return lemma.lower()
 
-
-
-
-
+        return None

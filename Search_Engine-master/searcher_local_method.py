@@ -1,3 +1,5 @@
+import copy
+
 from ranker_local_method import RankerLocalMethod
 import utils
 
@@ -20,6 +22,11 @@ class SearcherLocalMethod:
         self.invert_dic = indexer_dic["invert"]
         self.doc_dic = indexer_dic["docs"]
 
+        if "sij" in indexer_dic:
+            self.Sij_dic = indexer_dic["sij"]
+        else:
+            self.Sij_dic = None
+
         self.relevant_docs = {}
         self.counter_of_terms = {}
         self.unique_tweets_num = set()
@@ -39,6 +46,9 @@ class SearcherLocalMethod:
             and the last is the least relevant result.
         """
         query_as_list = self._parser.parse_sentence(query)
+
+        if self.Sij_dic is not None:
+            query_as_list.extend(self.expand_query_global_method(query_as_list))
 
         lst_before_extend = self._relevant_docs_from_posting(query_as_list)
 
@@ -163,6 +173,41 @@ class SearcherLocalMethod:
         # return [final, self.counter_of_terms]
 
         return [self.relevant_docs, self.counter_of_terms]
+
+
+    def expand_query_global_method(self, query_as_list):
+
+        # query_copy = copy.deepcopy(query_as_list)  # TODO - Maybe make dic
+        query_copy = {}
+        for term in query_as_list:
+
+
+            upper_term = term.upper()
+            lower_term = term.lower()
+            if term not in self.invert_dic and lower_term not in self.invert_dic and upper_term not in self.invert_dic:
+                continue
+            if lower_term in self.invert_dic:
+                term = lower_term
+            elif upper_term in self.invert_dic:
+                term = upper_term
+
+            query_copy[term] = 0
+
+        query_copy_not_delete = copy.deepcopy(query_copy)  # TODO - change the name xD
+
+        lst_of_word_to_add = []
+        for key, value in self.Sij_dic.items():
+            if self.Sij_dic[key] < 0.25 and len(lst_of_word_to_add) > 1:
+                break
+            if len(query_copy) == 0:
+                break
+            if key[0] in query_copy:
+                if key[1] not in query_copy_not_delete and key[1] not in lst_of_word_to_add:
+                    lst_of_word_to_add.append(key[1])
+                # query_copy.remove(key[0])
+                del query_copy[key[0]]
+
+        return lst_of_word_to_add
 
 
 

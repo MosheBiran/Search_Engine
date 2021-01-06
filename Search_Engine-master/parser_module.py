@@ -1,5 +1,6 @@
 import json
 
+from stemmer import Stemmer
 from nltk import TweetTokenizer, re
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -34,6 +35,7 @@ class Parse:
         self.stop_words['www'] = 0
         self.stop_words['..'] = 0
         self.stop_words['tweeter.com'] = 0
+        self.stop_words['twitter.com'] = 0
         self.punc = '''!()[]+{}-;:'"\, <>./|?^&*_~'''
         d = {}
         for word in self.punc:
@@ -109,7 +111,9 @@ class Parse:
                         after_parse_lst.append(text_tokens[i].lower())
             i += 1
 
-        # if self.stemming:
+        # stemming = True  # Todo - remove
+        #
+        # if stemming:
         #     ps = Stemmer()
         #     lst_after_stem = []
         #     for w in after_parse_lst:

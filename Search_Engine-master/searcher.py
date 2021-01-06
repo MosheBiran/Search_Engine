@@ -182,16 +182,16 @@ class Searcher:
 
             query_copy[term] = 0
 
-        query_copy_not = copy.deepcopy(query_copy)  # TODO - change the name xD
+        query_copy_not_delete = copy.deepcopy(query_copy)  # TODO - change the name xD
 
         lst_of_word_to_add = []
-        for key in self.Sij_dic.keys():
+        for key, value in self.Sij_dic.items():
             if self.Sij_dic[key] < 0.25 and len(lst_of_word_to_add) > 1:
                 break
             if len(query_copy) == 0:
                 break
             if key[0] in query_copy:
-                if key[1] not in query_copy_not and key[1] not in lst_of_word_to_add:
+                if key[1] not in query_copy_not_delete and key[1] not in lst_of_word_to_add:
                     lst_of_word_to_add.append(key[1])
                 # query_copy.remove(key[0])
                 del query_copy[key[0]]

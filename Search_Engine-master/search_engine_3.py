@@ -78,7 +78,7 @@ class SearchEngine:
     def load_precomputed_model(self, model_dir=None):
         """
         Loads a pre-computed model (or models) so we can answer queries.
-        This is where you would load models like word2vec, LSI, LDA, etc. and 
+        This is where you would load models like word2vec, LSI, LDA, etc. and
         assign to self._model, which is passed on to the searcher at query time.
         """
         pass
@@ -86,14 +86,14 @@ class SearchEngine:
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.
     def search(self, query):
-        """ 
-        Executes a query over an existing index and returns the number of 
+        """
+        Executes a query over an existing index and returns the number of
         relevant docs and an ordered list of search results.
         Input:
             query - string.
         Output:
-            A tuple containing the number of relevant search results, and 
-            a list of tweet_ids where the first element is the most relavant 
+            A tuple containing the number of relevant search results, and
+            a list of tweet_ids where the first element is the most relavant
             and the last is the least relevant result.
         """
         local_method = False

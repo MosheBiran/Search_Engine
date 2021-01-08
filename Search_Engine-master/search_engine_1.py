@@ -1,9 +1,11 @@
+import logging
 import math
 import os
 import time
-
+import numpy as ny
 import pandas as pd
-from parser_module import Parse
+from gensim.models import Word2Vec
+from parser_module_word2vec import Parse
 from indexer import Indexer
 from searcher import Searcher
 import utils
@@ -20,6 +22,7 @@ class SearchEngine:
         self._indexer = Indexer(config)
         self._model = None
 
+
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.
     def build_index_from_parquet(self, fn):
@@ -34,10 +37,11 @@ class SearchEngine:
         documents_list = df.values.tolist()
         # Iterate over every document in the file
         number_of_documents = 0
-
+        tweet_dic={}
         for idx, document in enumerate(documents_list):
             # parse the document
             parsed_document = self._parser.parse_doc(document)
+            tweet_dic[parsed_document.tweet_id] = [key for key in parsed_document.term_doc_dictionary.keys()]
             number_of_documents += 1
             # index the document data
             self._indexer.add_new_doc(parsed_document)
@@ -46,13 +50,23 @@ class SearchEngine:
         self._indexer.save_index("idx_bench.pkl")
 
         indexer_dic = utils.load_obj("idx_bench")
-
-        localMethod = True
+        indexer_dic["tweet_dic"]=tweet_dic
+        localMethod = False
         globalMethod = False
         wordNet = False
+        word2vec = True
 
         if localMethod:
             indexer_dic["local"] = True
+
+        if word2vec:
+            indexer_dic["word2vec"] = True
+            if os.path.exists("w2v_model.model"):
+                model = Word2Vec.load("w2v_model.model")
+                self._model = model
+            else:
+                logging.error(f'{"w2v_model.model"} does not exist.')
+
 
         if wordNet:
             indexer_dic["wordnet"] = True
@@ -185,3 +199,64 @@ def compute_Wi(indexer, globalMethod=None):
 
         return information, Sij_dic
 
+
+# def get_embedding_w2v(indexer, w2v_model):
+#
+#     information = indexer["docs"]
+#     invert = indexer["invert"]
+#
+#     for key, value in information.items():
+#
+#         to_remove = []
+#         to_change = {}
+#
+#         for k, v in value[0].items():
+#
+#             if k not in invert and k.upper() in invert:
+#                 term = k.upper()
+#                 to_change[k] = term
+#
+#             elif k not in invert and k.lower() in invert:
+#                 term = k.lower()
+#                 to_change[k] = term
+#
+#             elif k not in invert:
+#                 to_remove.append(k)
+#                 continue
+#
+#             else:
+#                 term = k
+#
+#             tf = v / value[1]
+#             idf = math.log2(len(indexer["docs"]) / invert[term])
+#             tf_idf = round(tf * idf, 3)
+#             value[0][k] = tf_idf
+#             x = tf_idf ** 2
+#             information[key][2] += tf_idf ** 2
+#
+#         for k in to_remove:
+#             del value[0][k]
+#
+#         for old, new in to_change.items():
+#             value[0][new] = value[0].pop(old)
+#
+#         if globalMethod is not None:
+#             for term1, frq1 in tweet_copy.items():
+#                 for term2, frq2 in tweet_copy.items():
+#
+#                     key = (term1, term2)
+#                     if key not in Cij_dic:
+#                         Cij_dic[key] = frq1*frq2
+#                     else:
+#                         Cij_dic[key] += frq1*frq2
+#     embeddings = []
+#     if len(doc_tokens) < 1:
+#         return np.zeros(300)
+#     else:
+#         for tok in doc_tokens:
+#             if tok in w2v_model.wv.vocab:
+#                 embeddings.append(w2v_model.wv.word_vec(tok))
+#             else:
+#                 embeddings.append(np.random.rand(300))
+#         # mean the vectors of individual words to get the vector of the document
+#         return np.mean(embeddings, axis=0)

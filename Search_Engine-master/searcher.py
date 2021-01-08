@@ -1,9 +1,10 @@
 import copy
+import warnings
 
 from ranker import Ranker
 import utils
 from nltk.corpus import wordnet
-
+import numpy as np
 
 # DO NOT MODIFY CLASS NAME
 class Searcher:
@@ -16,7 +17,12 @@ class Searcher:
         self._parser = parser
         self._indexer = indexer
         indexer_dic = indexer.load_index("idx_bench.pkl")
-        self._ranker = Ranker(indexer_dic["posting"], indexer_dic["docs"])
+
+        if "tweet_dic" in indexer_dic:
+            self._ranker = Ranker(indexer_dic["posting"], indexer_dic["docs"], indexer_dic["tweet_dic"])
+        else:
+            self._ranker = Ranker(indexer_dic["posting"], indexer_dic["docs"])
+
         self._model = model
 
         self.posting_dic = indexer_dic["posting"]
@@ -38,11 +44,14 @@ class Searcher:
         else:
             self.local = False
 
+        if "word2vec" in indexer_dic and model is not None:
+            self.word2vec = True
+        else:
+            self.word2vec = False
 
         self.relevant_docs = {}
         self.counter_of_terms = {}
         self.unique_tweets_num = set()
-
 
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.
@@ -60,10 +69,8 @@ class Searcher:
         """
         query_as_list = self._parser.parse_sentence(query)
 
-
         if self.Sij_dic is not None:
             query_as_list.extend(self.expand_query_global_method(query_as_list))
-
 
         if self.word_net:
             expend = []
@@ -71,10 +78,32 @@ class Searcher:
                 res = self.WordNet(term, query_as_list)
                 if res is not None:
                     expend.append(res)
-
             if len(expend) != 0:
                 query_as_list.extend(expend)
 
+        if self.word2vec:
+            # relevant_docs = self._relevant_docs_from_posting(query_as_list)
+            relevant_docs = self.second(query_as_list)
+
+            # expend = []
+            # for term in query_as_list:
+            #     res = self.WordNet(term, query_as_list)
+            #     if res is not None:
+            #         expend.append(res)
+            # if len(expend) != 0:
+            #     query_as_list.extend(expend)
+
+            # expend = []
+            # for term in query_as_list:
+            #     res = self.Word2VecExpansion(term,query_as_list)
+            #     if res is not None:
+            #         expend.append(res)
+            # if len(expend) != 0:
+            #     query_as_list.extend(expend)
+            # relevant_docs = self.second(query_as_list)
+
+            ranked_doc_ids = Ranker.rank_relevant_docs_w2v(self._ranker, self._model, query_as_list, relevant_docs)
+            return len(ranked_doc_ids), ranked_doc_ids
 
         if self.local:
             lst_before_extend = self._relevant_docs_from_posting(query_as_list)
@@ -87,16 +116,17 @@ class Searcher:
             self.unique_tweets_num.clear()
             self.relevant_docs.clear()
 
-            # lst_After_extend = self.second(query_as_list)
-            lst_After_extend = self._relevant_docs_from_posting(query_as_list)
+            lst_After_extend = self.second(query_as_list)
+            # lst_After_extend = self._relevant_docs_from_posting(query_as_list)
 
             ranked_doc_ids = Ranker.rank_relevant_docs(self._ranker, lst_After_extend)  # TODO - what about k
 
             return len(ranked_doc_ids), ranked_doc_ids
 
+        # relevant_docs = self._relevant_docs_from_posting(query_as_list)
 
+        relevant_docs = self.second(query_as_list)
 
-        relevant_docs = self._relevant_docs_from_posting(query_as_list)
         ranked_doc_ids = Ranker.rank_relevant_docs(self._ranker, relevant_docs)  # TODO - what about k
 
         # if len(ranked_doc_ids) > 2000:
@@ -104,7 +134,6 @@ class Searcher:
         #     return x, ranked_doc_ids[:2000]
 
         return len(ranked_doc_ids), ranked_doc_ids
-
 
     # feel free to change the signature and/or implementation of this function
     # or drop altogether.
@@ -116,7 +145,6 @@ class Searcher:
         """
 
         """--------------------------------------Original Searcher-----------------------------------------"""
-
 
         for term in query_as_list:
             try:  # an example of checks that you have to do
@@ -148,9 +176,6 @@ class Searcher:
                 print('term {} not found in posting'.format(term))
 
         return [self.relevant_docs, self.counter_of_terms]
-
-
-
 
         # """--------------------------------------improved Searcher-----------------------------------------"""
         # for term in query_as_list:
@@ -281,16 +306,11 @@ class Searcher:
         #
         # return [final, self.counter_of_terms]
 
-
-
-
-
     def expand_query_global_method(self, query_as_list):
 
         # query_copy = copy.deepcopy(query_as_list)  # TODO - Maybe make dic
         query_copy = {}
         for term in query_as_list:
-
 
             upper_term = term.upper()
             lower_term = term.lower()
@@ -319,7 +339,6 @@ class Searcher:
 
         return lst_of_word_to_add
 
-
     def WordNet(self, term, query_as_list):
         syns_for_term = wordnet.synsets(term)
         for syns in syns_for_term:
@@ -334,6 +353,18 @@ class Searcher:
 
         return None
 
+    def Word2VecExpansion(self, term, query_as_list):
+        warnings.filterwarnings(action='ignore')
+        syns_for_term = self._model.wv.most_similar(term)
+        for lemma, val in syns_for_term:
+            if lemma not in query_as_list and lemma in self.invert_dic:
+                if not  self._model.wv.doesnt_match(query_as_list+[lemma]) == lemma:
+                    return lemma
+                # elif lemma.upper() not in query_as_list and lemma.upper() in self.invert_dic:
+                #     return lemma.upper()
+                # elif lemma.lower() not in query_as_list and lemma.lower() in self.invert_dic:
+                #     return lemma.lower()
+        return None
 
     def second(self, query_as_list):
 
@@ -349,7 +380,7 @@ class Searcher:
                 elif upper_term in self.invert_dic:
                     term = upper_term
 
-                """--------------------------------------Counter of terms in the query-----------------------------------------"""
+                """--------------------------------Counter of terms in the query-------------------------------"""
 
                 if term in self.counter_of_terms.keys():
                     self.counter_of_terms[term] += 1
@@ -440,4 +471,3 @@ class Searcher:
         #
         #
         # return [self.relevant_docs, self.counter_of_terms]
-

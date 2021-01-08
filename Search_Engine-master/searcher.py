@@ -87,6 +87,7 @@ class Searcher:
             self.unique_tweets_num.clear()
             self.relevant_docs.clear()
 
+            # lst_After_extend = self.second(query_as_list)
             lst_After_extend = self._relevant_docs_from_posting(query_as_list)
 
             ranked_doc_ids = Ranker.rank_relevant_docs(self._ranker, lst_After_extend)  # TODO - what about k
@@ -131,21 +132,25 @@ class Searcher:
 
                 """--------------------------------------Counter of terms in the query-----------------------------------------"""
 
-                if term in self.relevant_docs.keys():
+                if term in self.counter_of_terms.keys():
                     self.counter_of_terms[term] += 1
                     continue
                 else:
                     self.counter_of_terms[term] = 1
 
                 """--------------------------------------Open and Close posting files-----------------------------------------"""
+
                 self.relevant_docs[term] = self.posting_dic[term]
-                self.unique_tweets_num.update(set(list(self.posting_dic[term].keys())))
+                self.unique_tweets_num.update(set(list(self.posting_dic[term].keys())))  # TODO - Original
 
 
             except:
                 print('term {} not found in posting'.format(term))
 
         return [self.relevant_docs, self.counter_of_terms]
+
+
+
 
         # """--------------------------------------improved Searcher-----------------------------------------"""
         # for term in query_as_list:
@@ -177,52 +182,56 @@ class Searcher:
         #
         # return [self.unique_tweets_num, self.counter_of_terms]
 
+        # """--------------------------------------Doc len >=  Tweet len-----------------------------------------"""
+
+        # for term in query_as_list:
+        #     try:  # an example of checks that you have to do
+        #
+        #         upper_term = term.upper()
+        #         lower_term = term.lower()
+        #         if term not in self.invert_dic and lower_term not in self.invert_dic and upper_term not in self.invert_dic:
+        #             continue
+        #         elif lower_term in self.invert_dic:
+        #             term = lower_term
+        #         elif upper_term in self.invert_dic:
+        #             term = upper_term
+        #
+        #         """--------------------------------------Counter of terms in the query-----------------------------------------"""
+        #
+        #         if term in self.relevant_docs.keys():
+        #             self.counter_of_terms[term] += 1
+        #             continue
+        #         else:
+        #             self.counter_of_terms[term] = 1
+        #
+        #         """--------------------------------------Open and Close posting files-----------------------------------------"""
+        #         to_add = {}
+        #         for key in self.posting_dic[term]:
+        #             tweet = self.doc_dic[key]
+        #             if len(tweet[0]) >= len(query_as_list):
+        #                 to_add[key] = self.posting_dic[term][key]
+        #                 self.unique_tweets_num.update(set(key))
+        #             # else:  # TODO - check synonym - not helping like this
+        #             #     new_term = self.WordNet(term, query_as_list)
+        #             #     if new_term is not None:
+        #             #         for key2 in self.posting_dic[new_term]:
+        #             #             tweet2 = self.doc_dic[key2]
+        #             #             if len(tweet2[0]) >= len(query_as_list):
+        #             #                 to_add[key2] = self.posting_dic[new_term][key2]
+        #             #                 self.unique_tweets_num.update(set(key2))
+        #
+        #         if len(to_add) > 0:
+        #             self.relevant_docs[term] = to_add
+        #         # self.relevant_docs[term] = self.posting_dic[term]
+        #         # self.unique_tweets_num.update(set(list(self.posting_dic[term].keys())))  # TODO - Original
+        #
+        #
+        #     except:
+        #         print('term {} not found in posting'.format(term))
+        #
+        # return [self.relevant_docs, self.counter_of_terms]
+
         # """--------------------------------------2 Terms Q Searcher-----------------------------------------"""
-
-        # for term1 in query_as_list:
-        #     for term2 in query_as_list:
-        #         try:
-        #
-        #             if term1 == term2:
-        #                 continue
-        #
-        #             upper_term1 = term1.upper()
-        #             lower_term1 = term1.lower()
-        #             upper_term2 = term2.upper()
-        #             lower_term2 = term2.lower()
-        #
-        #             if term1 not in self.invert_dic and lower_term1 not in self.invert_dic and upper_term1 not in self.invert_dic:
-        #                 continue
-        #             if lower_term1 in self.invert_dic:
-        #                 term1 = lower_term1
-        #             elif upper_term1 in self.invert_dic:
-        #                 term1 = upper_term1
-        #
-        #             if term2 not in self.invert_dic and lower_term2 not in self.invert_dic and upper_term2 not in self.invert_dic:
-        #                 continue
-        #
-        #             if lower_term2 in self.invert_dic:
-        #                 term2 = lower_term2
-        #
-        #             elif upper_term2 in self.invert_dic:
-        #                 term2 = upper_term2
-        #
-        #             if term1 in self.invert_dic and term2 in self.invert_dic:
-        #
-        #                 if term1 in self.relevant_docs.keys():
-        #                     self.counter_of_terms[term1] += 1
-        #                     continue
-        #                 else:
-        #                     self.counter_of_terms[term1] = 1
-        #
-        #                 self.relevant_docs[term1] = self.posting_dic[term1]
-        #                 self.unique_tweets_num.update(set(list(self.posting_dic[term1].keys())))
-        #                 break
-        #
-        #
-        #         except:
-        #             print('term {} not found in posting'.format(term1))
-
 
         # for term in query_as_list:
         #     try:  # an example of checks that you have to do
@@ -324,3 +333,111 @@ class Searcher:
                     return lemma.lower()
 
         return None
+
+
+    def second(self, query_as_list):
+
+        for term in query_as_list:
+            try:  # an example of checks that you have to do
+
+                upper_term = term.upper()
+                lower_term = term.lower()
+                if term not in self.invert_dic and lower_term not in self.invert_dic and upper_term not in self.invert_dic:
+                    continue
+                elif lower_term in self.invert_dic:
+                    term = lower_term
+                elif upper_term in self.invert_dic:
+                    term = upper_term
+
+                """--------------------------------------Counter of terms in the query-----------------------------------------"""
+
+                if term in self.counter_of_terms.keys():
+                    self.counter_of_terms[term] += 1
+                    continue
+                else:
+                    self.counter_of_terms[term] = 1
+
+                """--------------------------------------Open and Close posting files-----------------------------------------"""
+                to_add = {}
+                for key in self.posting_dic[term]:
+                    tweet = self.doc_dic[key]
+                    if len(tweet[0]) >= len(query_as_list):
+                        to_add[key] = self.posting_dic[term][key]
+                        self.unique_tweets_num.update(set(key))
+                    # else:  # TODO - check synonym - not helping like this
+                    #     new_term = self.WordNet(term, query_as_list)
+                    #     if new_term is not None:
+                    #         for key2 in self.posting_dic[new_term]:
+                    #             tweet2 = self.doc_dic[key2]
+                    #             if len(tweet2[0]) >= len(query_as_list):
+                    #                 to_add[key2] = self.posting_dic[new_term][key2]
+                    #                 self.unique_tweets_num.update(set(key2))
+
+                if len(to_add) > 0:
+                    self.relevant_docs[term] = to_add
+                # self.relevant_docs[term] = self.posting_dic[term]
+                # self.unique_tweets_num.update(set(list(self.posting_dic[term].keys())))  # TODO - Original
+
+
+            except:
+                print('term {} not found in posting'.format(term))
+
+        return [self.relevant_docs, self.counter_of_terms]
+
+        # """--------------------------------------2 Terms Q Searcher-----------------------------------------"""
+        #
+        # for term in query_as_list:
+        #     try:  # an example of checks that you have to do
+        #
+        #         upper_term = term.upper()
+        #         lower_term = term.lower()
+        #         if term not in self.invert_dic and lower_term not in self.invert_dic and upper_term not in self.invert_dic:
+        #             continue
+        #         elif lower_term in self.invert_dic:
+        #             term = lower_term
+        #         elif upper_term in self.invert_dic:
+        #             term = upper_term
+        #
+        #         """--------------------------------------Counter of terms in the query-----------------------------------------"""
+        #
+        #         if term in self.relevant_docs.keys():
+        #             self.counter_of_terms[term] += 1
+        #             continue
+        #         else:
+        #             self.counter_of_terms[term] = 1
+        #
+        #         """--------------------------------------Open and Close posting files-----------------------------------------"""
+        #         self.relevant_docs[term] = self.posting_dic[term]
+        #         self.unique_tweets_num.update(set(list(self.posting_dic[term].keys())))
+        #
+        #
+        #     except:
+        #         print('term {} not found in posting'.format(term))
+        #
+        #
+        # self.relevant_docs.clear()
+        # for id in self.unique_tweets_num:
+        #     flag = False
+        #     tweet = self.doc_dic[id][0]
+        #     for term1 in self.counter_of_terms:
+        #         for term2 in self.counter_of_terms:
+        #
+        #             # if len(self.counter_of_terms) <= 5:  # or len(self.counter_of_terms) == 2 or len(self.counter_of_terms) == 3:  # TODO - new version - best <=5
+        #             #     final[id] = 0
+        #             #     break
+        #
+        #             if term1 == term2:
+        #                 continue
+        #
+        #             if term1 in tweet and term2 in tweet:
+        #                 if term1 not in self.relevant_docs:
+        #                     self.relevant_docs[term1] = {}
+        #                 self.relevant_docs[term1][id] = self.posting_dic[term1][id]
+        #                 flag = True
+        #                 break
+        #         if flag:
+        #             break
+        #
+        #
+        # return [self.relevant_docs, self.counter_of_terms]
+

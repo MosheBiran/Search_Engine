@@ -162,6 +162,12 @@ class Ranker:
                 raise TypeError  # TODO - Remove!!!
             tweet_id_CosSim[key][2] = cos_sim
 
+        # res = dict(sorted(tweet_id_CosSim.items(), key=lambda e: e[1][2], reverse=True))  # for test
+        # res2 = [key for key, val in res.items() if val[2] > 0.05]
+        #
+        # if len(res) == len(res2):
+        #     x = 1  # Todo - Remove\check
+
         sorted_cos_sim = dict(sorted(tweet_id_CosSim.items(), key=lambda e: e[1][2], reverse=True)[:200])  # for test
 
         """--------------------------------------Init Association Matrix-----------------------------------------"""

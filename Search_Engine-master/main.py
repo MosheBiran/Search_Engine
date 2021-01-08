@@ -22,6 +22,17 @@ import configuration
 
 if __name__ == '__main__':
 
+
+    parquet_files = []
+    df = pd.read_parquet('C:\\benchmark_data_train.snappy.parquet', engine='pyarrow')
+    parquet_files.append(df)
+
+    df = pd.concat(parquet_files, sort=False)
+
+
+
+
+
     # logging.basicConfig(filename='part_c_tests.log', level=logging.DEBUG,
     #                     filemode='w', format='%(levelname)s %(asctime)s: %(message)s')
     # import metrics
@@ -135,10 +146,21 @@ if __name__ == '__main__':
                             invalid_tweet_ids = [doc_id for doc_id in q_res if invalid_tweet_id(doc_id)]
 
                             # TODO - print 5 Tweet ids
-                            to_show = [1, 2, 4, 7, 8]
-                            if q_id in to_show:
-                                for i in range(5):
-                                    print(q_res[i])
+                            # to_show = [1, 2, 4, 7, 8]
+                            # if q_id in to_show:
+                            #     print("------  " + q_keywords + "  ------")
+                            #     for i in range(5):
+                            #         print("\n"+ q_res[i])
+                            #         df1 = df[df['tweet_id'].str.contains(str(q_res[i]))]
+                            #         with pd.option_context('display.max_colwidth', 1000):
+                            #             print(df1.full_text)
+
+                            print("------  " + q_keywords + "  ------")
+                            for i in range(5):
+                                print("\n"+ q_res[i])
+                                df1 = df[df['tweet_id'].str.contains(str(q_res[i]))]
+                                with pd.option_context('display.max_colwidth', 1000):
+                                    print(df1.full_text)
 
                             if len(invalid_tweet_ids) > 0:
                                 print(f"Query  {q_id} returned results that are not valid tweet ids: " + str(invalid_tweet_ids[:10]))

@@ -47,7 +47,7 @@ class SearchEngine:
 
         indexer_dic = utils.load_obj("idx_bench")
 
-        localMethod = True
+        localMethod = False
         globalMethod = False
         wordNet = False
 

@@ -6,6 +6,9 @@ import utils
 from nltk.corpus import wordnet
 import numpy as np
 
+warnings.filterwarnings(action='ignore')
+
+
 # DO NOT MODIFY CLASS NAME
 class Searcher:
     # DO NOT MODIFY THIS SIGNATURE
@@ -82,26 +85,23 @@ class Searcher:
                 query_as_list.extend(expend)
 
         if self.word2vec:
+            expend = []
+            # res = self.Word2VecExpansion(query_as_list)
+            # if res is not None:
+            #     expend.append(res)
+            # for idx, term in enumerate(query_as_list):
+            #     res = self.WordNet_w2v(term, query_as_list)
+            #     if res is not None:
+            #         expend.append(res)
+            # if res is not None:
+            #     res = self.Word2VecExpansion(query_as_list)
+            #     if res is not None:
+            #         expend.append(res)
+            if len(expend) != 0:
+                query_as_list.extend(expend)
+
             # relevant_docs = self._relevant_docs_from_posting(query_as_list)
             relevant_docs = self.second(query_as_list)
-
-            # expend = []
-            # for term in query_as_list:
-            #     res = self.WordNet(term, query_as_list)
-            #     if res is not None:
-            #         expend.append(res)
-            # if len(expend) != 0:
-            #     query_as_list.extend(expend)
-
-            # expend = []
-            # for term in query_as_list:
-            #     res = self.Word2VecExpansion(term,query_as_list)
-            #     if res is not None:
-            #         expend.append(res)
-            # if len(expend) != 0:
-            #     query_as_list.extend(expend)
-            # relevant_docs = self.second(query_as_list)
-
             ranked_doc_ids = Ranker.rank_relevant_docs_w2v(self._ranker, self._model, query_as_list, relevant_docs)
             return len(ranked_doc_ids), ranked_doc_ids
 
@@ -340,6 +340,7 @@ class Searcher:
         return lst_of_word_to_add
 
     def WordNet(self, term, query_as_list):
+        warnings.filterwarnings(action='ignore')
         syns_for_term = wordnet.synsets(term)
         for syns in syns_for_term:
             lemmas = set(syns._lemma_names)
@@ -353,17 +354,30 @@ class Searcher:
 
         return None
 
-    def Word2VecExpansion(self, term, query_as_list):
+    def WordNet_w2v(self, term, query_as_list):
         warnings.filterwarnings(action='ignore')
-        syns_for_term = self._model.wv.most_similar(term)
+        syns_for_term = wordnet.synsets(term)
+        # if term not in self._model.wv.vocab:
+        for syns in syns_for_term:
+            lemmas = set(syns._lemma_names)
+            for lemma in lemmas:
+                # print(lemma)
+                if lemma.lower() not in query_as_list and lemma.lower() in self.invert_dic and lemma in self._model.wv.vocab:
+                    # if not self._model.wv.doesnt_match(query_as_list + [lemma]) == lemma:
+                        return lemma.lower()
+
+        return None
+
+    def Word2VecExpansion(self, query_as_list):
+        warnings.filterwarnings(action='ignore')
+        syns_for_term = self._model.wv.most_similar(query_as_list)[:15]
         for lemma, val in syns_for_term:
-            if lemma not in query_as_list and lemma in self.invert_dic:
-                if not  self._model.wv.doesnt_match(query_as_list+[lemma]) == lemma:
-                    return lemma
-                # elif lemma.upper() not in query_as_list and lemma.upper() in self.invert_dic:
-                #     return lemma.upper()
-                # elif lemma.lower() not in query_as_list and lemma.lower() in self.invert_dic:
-                #     return lemma.lower()
+            if lemma.lower() not in query_as_list and lemma.lower() in self.invert_dic:
+                if val > 0.7:
+                    return lemma.lower()
+                else:
+                    return None
+
         return None
 
     def second(self, query_as_list):

@@ -66,9 +66,9 @@ class Parse:
         # doc needs to be a spacy Doc object
         # [[token.lemma_ for token in nlp(" ".join(doc))] for doc in corpus]
         # [x.lower() for x in after_parse_lst if x not in self.stop_words and x not in self.punc]
-        txt = [self.lemmatizer.lemmatize(w, get_wordnet_pos(w)) for w in doc if str(w) not in self.punc and str(w) not in self.stop_words]
+        # txt = [self.lemmatizer.lemmatize(w, get_wordnet_pos(w)) for w in doc if str(w) not in self.punc and str(w) not in self.stop_words]
         # print(txt)
-        # txt = [token.lemma_ for token in self.nlp(" ".join(doc)) if str(token) not in self.punc and str(token) not in self.stop_words]
+        txt = [token.lemma_ for token in self.nlp(" ".join(doc)) if str(token) not in self.punc and str(token) not in self.stop_words]
         # print(txt1)
         # Word2Vec uses context words to learn the vector representation of a target word,
         # if a sentence is only one or two words long,

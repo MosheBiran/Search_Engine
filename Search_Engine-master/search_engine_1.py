@@ -2,10 +2,14 @@ import logging
 import math
 import os
 import time
+import warnings
+
+import gensim
 import numpy as ny
 import pandas as pd
 from gensim.models import Word2Vec
-from parser_module_word2vec import Parse
+from parser_module_word2vec_2 import Parse
+# from parser_module_word2vec import Parse
 from indexer import Indexer
 from searcher import Searcher
 import utils
@@ -60,13 +64,22 @@ class SearchEngine:
             indexer_dic["local"] = True
 
         if word2vec:
+            warnings.filterwarnings(action='ignore')
             indexer_dic["word2vec"] = True
-            if os.path.exists("w2v_model.model"):
-                model = Word2Vec.load("w2v_model.model")
-                self._model = model
+            if os.path.exists("Word2Vec_Model_full_min_10.bin"):
+                # model = Word2Vec.load("Word2Vec_Model_full_min_10.model")
+                lodeing=gensim.models.KeyedVectors
+                self._model = gensim.models.KeyedVectors.load_word2vec_format("Word2Vec_Model_full_min_10.bin", binary= True, unicode_errors ='ignore' )
             else:
-                logging.error(f'{"w2v_model.model"} does not exist.')
+                logging.error(f'{"Word2Vec_Model_full_min_10.bin"} does not exist.')
 
+        # if word2vec:
+        #     indexer_dic["word2vec"] = True
+        #     if os.path.exists("w2v_model.model"):
+        #         model = Word2Vec.load("w2v_model.model")
+        #         self._model = model
+        #     else:
+        #         logging.error(f'{"w2v_model.model"} does not exist.')
 
         if wordNet:
             indexer_dic["wordnet"] = True
@@ -101,7 +114,9 @@ class SearchEngine:
         This is where you would load models like word2vec, LSI, LDA, etc. and
         assign to self._model, which is passed on to the searcher at query time.
         """
-        pass
+        # self._model = gensim.models.KeyedVectors.load_word2vec_format(model_dir + '\\Word2Vec_Model_full_min_10.model')
+        self._model = Word2Vec.load(model_dir + '\\Word2Vec_Model_full_min_10.model')
+        self._config.set_download_model(False)
 
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.

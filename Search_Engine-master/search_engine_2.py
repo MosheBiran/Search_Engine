@@ -48,6 +48,10 @@ class SearchEngine:
         self._indexer.save_index("idx_bench.pkl")
 
         indexer_dic = utils.load_obj("idx_bench")
+        #
+        # self._indexer.save_index("idx.pkl")  # TODO - we need submit this
+        #
+        # indexer_dic = utils.load_obj("idx")  # TODO - we need submit this
 
         localMethod = False
         globalMethod = True
@@ -63,6 +67,8 @@ class SearchEngine:
         if spellChecker:
             indexer_dic["spellChecker"] = True
 
+
+
         if globalMethod:
             docs_dic, Sij_dic = compute_Wi(indexer_dic, globalMethod)
             indexer_dic["docs"] = docs_dic
@@ -72,6 +78,7 @@ class SearchEngine:
             indexer_dic["docs"] = docs_dic
 
         utils.save_obj(indexer_dic, "idx_bench")
+        # utils.save_obj(indexer_dic, "idx")  # TODO - we need submit this
 
 
 

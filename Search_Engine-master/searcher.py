@@ -16,6 +16,7 @@ class Searcher:
         self._parser = parser
         self._indexer = indexer
         indexer_dic = indexer.load_index("idx_bench.pkl")
+        # indexer_dic = indexer.load_index("idx.pkl")  # TODO - this we need to submit
         self._ranker = Ranker(indexer_dic["posting"], indexer_dic["docs"])
         self._model = model
 

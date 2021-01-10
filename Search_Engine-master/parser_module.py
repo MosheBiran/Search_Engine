@@ -110,7 +110,7 @@ class Parse:
             i += 1
 
 
-        after_parse_lst = [x for x in after_parse_lst if x not in self.stop_words and x not in self.punc]
+        after_parse_lst = [x for x in after_parse_lst if x not in self.stop_words and x not in self.punc and not ' ' in x and not '...' in x and not '\n' in x]
         return after_parse_lst
 
     def parse_doc(self, doc_as_list):

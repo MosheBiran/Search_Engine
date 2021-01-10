@@ -4,7 +4,7 @@ import warnings
 class ConfigClass:
     def __init__(self):
         # link to a zip file in google drive with your pretrained model
-        self._model_url = "https://drive.google.com/file/d/16zQx_eaRfGm8tuGvGbhBTi_YQ6PFxRID/view?usp=sharing"
+        self._model_url = "https://drive.google.com/file/d/1nrtCmrtGd4rBjMM-1prU-0hrWDNzW6z1/view?usp=sharing"
         # False/True flag indicating whether the testing system will download
         # and overwrite the existing model files. In other words, keep this as
         # False until you update the model, submit with True to download

@@ -184,26 +184,25 @@ class Ranker:
         tweet_id_data = {}
         tweet_id_CosSim = {}
 
+        tweet_id_data.clear()
+        tweet_id_CosSim.clear()
+
         for value in relevant_doc.values():
             for v in value.keys():
                 if v not in tweet_id_data:
                     tweet_id_data[v] = self.docs_dic[v]
                     tweet_id_CosSim[v] = [0]
 
-        # for key, value in tweet_id_data.items():
-        #     for term in query_as_list:
-        #         if term in value[0]:
-        #             sim = lambda x: cosine_similarity(np.array(qvector).reshape(1, -1), np.array(x).reshape(1, -1)).item()
-        #             value_v = self.get_embedding_w2v(w2v_model, self.tweet_dic[key])
-        #             tweet_id_CosSim[key] = sim(value_v)
 
         norm_vec_q = norm(qvector)
         for key, value in tweet_id_data.items():
             for term in query_as_list:
+                if '1283449480642064384' == key:
+                    x = 1
                 vec = self.get_embedding_w2v(w2v_model, self.tweet_dic[key])
                 tweet_id_CosSim[key] = np.dot(qvector, vec) / (norm_vec_q * norm(vec))
 
-        res = dict(sorted(tweet_id_CosSim.items(), key=lambda e: e[1], reverse=True))  # for test
+        res1 = dict(sorted(tweet_id_CosSim.items(), key=lambda e: e[1], reverse=True))  # for test
 
-        res2 = list(res.keys())
-        return res2
+        res12 = list(res1.keys())
+        return res12

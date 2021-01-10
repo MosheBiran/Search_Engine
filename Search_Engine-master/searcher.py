@@ -93,26 +93,23 @@ class Searcher:
                 query_as_list.extend(expend)
 
         if self.word2vec:
-            expend = []
 
-            # x = [y for y in query_as_list if y.isalpha()]
-            # res = self.Word2VecExpansion(x)
-            # if res is not None:
-            #     expend.append(res)
-            # for idx, term in enumerate(x):
-            #     res = self.WordNet_w2v(term, query_as_list)
-            #     if res is not None:
-            #         expend.append(res)
-            # if res is not None:
-            #     res = self.Word2VecExpansion(query_as_list)
-            #     if res is not None:
-            #         expend.append(res)
-            # if len(expend) != 0:
-            #     query_as_list.extend(expend)
+            if self.local:
 
-            # relevant_docs = self._relevant_docs_from_posting(query_as_list)
+                lst_before_extend = self._relevant_docs_from_posting(query_as_list)
+
+                add_to_query = Ranker.compute_extend_word(self._ranker, lst_before_extend)
+
+                query_as_list.extend(add_to_query)
+
+                self.counter_of_terms.clear()
+                self.unique_tweets_num.clear()
+                self.relevant_docs.clear()
+
+
             relevant_docs = self.second(query_as_list)
             ranked_doc_ids = Ranker.rank_relevant_docs_w2v(self._ranker, self._model, query_as_list, relevant_docs)
+
             return len(ranked_doc_ids), ranked_doc_ids
 
 

@@ -134,9 +134,6 @@ class Parse:
         term_dict = {}
         tokenized_text = self.parse_sentence(full_text)
 
-        # if quote_text is not None:
-        #     tokenized_text += self.parse_sentence(quote_text)  # TODO - if Results not good check with this
-
         if doc_as_list[3] is None or doc_as_list[3] == '[]' or doc_as_list[3] == '{}':
             url = None
         else:

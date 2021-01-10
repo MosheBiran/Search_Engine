@@ -6,8 +6,6 @@ import gensim as gensim
 from gensim.models import Word2Vec
 
 import pandas as pd
-from reader import ReadFile
-from configuration import ConfigClass
 from parser_module_word2vec_2 import Parse
 from indexer import Indexer
 from searcher import Searcher
@@ -112,13 +110,8 @@ class SearchEngine:
         """
         self._model = gensim.models.KeyedVectors.load_word2vec_format(os.path.join(model_dir, 'trained_Word2Vec'),
                                                                       binary=True,
-                                                                      encoding='utf-8', unicode_errors='ignore' )
-        # self._model = gensim.models.KeyedVectors.load_word2vec_format('trained_Word2Vec',
-        #                                                               binary=True,
-        #                                                               encoding='utf-8', unicode_errors='ignore')
+                                                                      encoding='utf-8', unicode_errors='ignore')
 
-        # self._model = Word2Vec.load(model_dir + '\\Word2Vec_Model_full_min_10.model')
-        # self._model = Word2Vec.load("Word2Vec_Model")
         self._config.set_download_model(False)
 
     # DO NOT MODIFY THIS SIGNATURE

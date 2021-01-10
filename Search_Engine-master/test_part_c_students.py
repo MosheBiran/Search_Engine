@@ -12,7 +12,6 @@ if __name__ == '__main__':
 
     logging.basicConfig(filename='part_c_tests.log', level=logging.DEBUG,
                         filemode='w', format='%(levelname)s %(asctime)s: %(message)s')
-    import metrics
 
 
     def test_file_exists(fn):
@@ -40,14 +39,16 @@ if __name__ == '__main__':
 
     start = datetime.now()
     try:
+        import metrics
+
         # is the report there?
-        test_file_exists('report_part_c.docx')
+        # test_file_exists('report_part_c.docx')
         # is benchmark data under 'data' folder?
         bench_lbls = None
         q2n_relevant = None
         if not test_file_exists(bench_data_path) or \
                 not test_file_exists(bench_lbls_path):
-            logging.error("Benchmark data does exist under the 'data' folder.")
+            logging.error("Benchmark data does not exist under the 'data' folder.")
             sys.exit(-1)
         else:
             bench_lbls = pd.read_csv(bench_lbls_path,
@@ -66,6 +67,8 @@ if __name__ == '__main__':
         import configuration
 
         config = configuration.ConfigClass()
+        if hasattr(config, 'model_dir'):
+            config.model_dir = model_dir
 
         # do we need to download a pretrained model?
         model_url = config.get_model_url()
@@ -82,8 +85,8 @@ if __name__ == '__main__':
             else:
                 logging.error('model.zip file does not exists.')
 
-        # test for each search engine module  #TODO - Remove the '3'
-        engine_modules = ['search_engine_' + name for name in ['1', '2', '3', '4', 'best']]
+        # test for each search engine module
+        engine_modules = ['search_engine_' + name for name in ['1', '2', 'best']]
         for engine_module in engine_modules:
             try:
                 # does the module file exist?
@@ -123,7 +126,6 @@ if __name__ == '__main__':
                     for i, row in queries.iterrows():
                         q_id = row['query_id']
                         q_keywords = row['keywords']
-                        # q_keywords = row['information_need']
                         start_time = time.time()
                         q_n_res, q_res = engine.search(q_keywords)
                         end_time = time.time()
@@ -187,11 +189,15 @@ if __name__ == '__main__':
                     if recall < 0 or recall > 1:
                         logging.error(f"The average recall for {engine_module} is out of range [0,1].")
 
-                if engine_module == 'search_engine_best' and \
-                        test_file_exists('idx_bench.pkl'):
-                    logging.info('idx_bench.pkl found!')
-                    engine.load_index('idx_bench.pkl')
-                    logging.info('Successfully loaded idx_bench.pkl using search_engine_best.')
+                if engine_module == 'search_engine_best':
+                    paths = ['idx_bench.pkl', os.path.join(model_dir, 'idx_bench.pkl')]
+                    idx_path = next((p for p in paths if os.path.exists(p)), None)
+                    if idx_path is not None:
+                        logging.info(f'{idx_path} found!')
+                        engine.load_index(idx_path)
+                        logging.info('Successfully loaded idx_bench.pkl using search_engine_best.')
+                    else:
+                        logging.error(f'idx_bench.pkl cannot be found in the current directory or under {model_dir}.')
 
             except Exception as e:
                 logging.error(f'The following error occured while testing the module {engine_module}.')

@@ -52,12 +52,18 @@ class SearchEngine:
         localMethod = False
         globalMethod = False
         wordNet = False
+        spellChecker = False
 
         if localMethod:
             indexer_dic["local"] = True
 
         if wordNet:
             indexer_dic["wordnet"] = True
+
+        if spellChecker:
+            indexer_dic["spellChecker"] = True
+
+
 
         if globalMethod:
             docs_dic, Sij_dic = compute_Wi(indexer_dic, globalMethod)

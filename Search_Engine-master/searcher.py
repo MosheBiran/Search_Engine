@@ -1,7 +1,7 @@
 import copy
 
+from spellchecker import SpellChecker
 from ranker import Ranker
-import utils
 from nltk.corpus import wordnet
 
 
@@ -38,6 +38,11 @@ class Searcher:
         else:
             self.local = False
 
+        if "spellChecker" in indexer_dic:
+            self.spellcheck = True
+        else:
+            self.spellcheck = False
+
 
         self.relevant_docs = {}
         self.counter_of_terms = {}
@@ -62,6 +67,8 @@ class Searcher:
         """
         query_as_list = self._parser.parse_sentence(query)
 
+        if self.spellcheck:
+            query_as_list = self.spell_check_query(query_as_list)
 
         if self.Sij_dic is not None:
             query_as_list.extend(self.expand_query_global_method(query_as_list))
@@ -398,3 +405,22 @@ class Searcher:
         return [self.relevant_docs, self.counter_of_terms]
 
 
+    def spell_check_query(self, query_as_list):
+        checker = SpellChecker()
+        new_query = []
+        for term in query_as_list:
+            if term not in self.invert_dic and term.lower() not in self.invert_dic and term.upper() not in self.invert_dic:
+                correction = checker.correction(term)
+                if correction in self.invert_dic:
+                    new_query.append(correction)
+                    continue
+                elif correction.upper() in self.invert_dic:
+                    new_query.append(correction.upper())
+                    continue
+                elif correction.lower() in self.invert_dic:
+                    new_query.append(correction.lower())
+                    continue
+
+            new_query.append(term)
+
+        return new_query

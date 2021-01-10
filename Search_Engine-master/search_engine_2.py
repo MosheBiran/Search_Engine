@@ -113,48 +113,6 @@ class SearchEngine:
         return searcher.search(query)
 
 
-# def main(corpus_path, output_path, queries, k):
-#
-#     timeOfBuild = time.time()
-#
-#     config = ConfigClass()
-#     config.set__corpusPath(corpus_path)
-#     config.set__outputPath(output_path)
-#
-#     searchEngine = SearchEngine(config)
-#     searchEngine.build_index_from_parquet(corpus_path)
-#
-#
-#
-#
-#     print("Time To Build The Engine :%.2f" % ((time.time() - timeOfBuild) / 60) + '\n\r')
-#
-#     query_counter = 0
-#
-#     if type(queries) is list:  # TODO - maybe remove
-#         Lines = queries
-#
-#     else:
-#         Lines = []
-#         with open(queries, 'rb') as fp:
-#             line = fp.readline()
-#             while line:
-#                 if line.decode().strip():
-#                     Lines.append(line.decode().strip())
-#                 line = fp.readline()
-#
-#     for query in Lines:
-#         query_counter += 1
-#
-#         print("Query Number : " + str(query_counter))  # TODO - Remove
-#         start = time.time()
-#
-#         for doc_tuple in searchEngine.search(query):
-#             print('Tweet id: {} Score: {}'.format(doc_tuple[0], doc_tuple[1][2]))
-#
-#         print("Query time :%.2f" % ((time.time() - start) / 60) + '\n\r')
-#         print("**************************\n")
-
 
 def compute_Wi(indexer, globalMethod=None):
 
@@ -226,8 +184,6 @@ def compute_Wi(indexer, globalMethod=None):
             Cii = (Sij[0], Sij[0])
             Cjj = (Sij[1], Sij[1])
             Sij_dic[Sij] = Cij_dic[Sij] / (Cij_dic[Cii] + Cij_dic[Cjj] - Cij_dic[Sij])
-            if Sij_dic[Sij] > 1:
-                print("Sij Global More Then 1 !!!!!")  # TODO - Remove
 
         Sij_dic = dict(sorted(Sij_dic.items(), key=lambda e: e[1], reverse=True))
 

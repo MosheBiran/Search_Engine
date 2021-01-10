@@ -182,8 +182,6 @@ def compute_Wi(indexer, globalMethod=None):
             Cii = (Sij[0], Sij[0])
             Cjj = (Sij[1], Sij[1])
             Sij_dic[Sij] = Cij_dic[Sij] / (Cij_dic[Cii] + Cij_dic[Cjj] - Cij_dic[Sij])
-            if Sij_dic[Sij] > 1:
-                print("Sij Global More Then 1 !!!!!")  # TODO - Remove
 
         Sij_dic = dict(sorted(Sij_dic.items(), key=lambda e: e[1], reverse=True))
 

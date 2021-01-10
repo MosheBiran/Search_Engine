@@ -6,14 +6,10 @@ class Indexer:
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.
     def __init__(self, config):
-        # self.inverted_idx = {}
-        # self.postingDict = {}
-        # self.config = config
         self.inverted_idx = {}
         self.postingDict = {}
         self.entities = {}
         self.config = config
-        self.first_time_term = {}
         self.doc_dic = {}
 
     # DO NOT MODIFY THIS SIGNATURE
@@ -101,39 +97,6 @@ class Indexer:
                         self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f,
                                                                      unique_terms, doc_len]
                         continue
-
-                """--------------------------------------first time term-----------------------------------------"""
-
-                # # first time
-                # if term not in self.inverted_idx and lower_term not in self.inverted_idx and upper_term not in self.inverted_idx \
-                #         and term not in self.first_time_term and upper_term not in self.first_time_term and lower_term not in self.first_time_term:
-                #     self.first_time_term[term] = {}
-                #     self.first_time_term[term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms, doc_len]
-                #     continue
-                #
-                # # big only 1 and now small
-                # elif term.upper() in self.first_time_term and term.islower():
-                #     self.inverted_idx[term] = [2, pointer_posting]
-                #     self.postingDict[term] = self.first_time_term[upper_term]
-                #     self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms, doc_len]
-                #     del self.first_time_term[upper_term]
-                #     continue
-                #
-                # # big only 1 and now big
-                # elif term.upper() in self.first_time_term and term.isupper():
-                #     self.inverted_idx[term] = [2, pointer_posting]
-                #     self.postingDict[term] = self.first_time_term[term]
-                #     self.postingDict[term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms, doc_len]
-                #     del self.first_time_term[term]
-                #     continue
-                #
-                # # small only 1 and now big\small
-                # elif term.lower() in self.first_time_term:
-                #     self.inverted_idx[lower_term] = [2, pointer_posting]
-                #     self.postingDict[lower_term] = self.first_time_term[lower_term]
-                #     self.postingDict[lower_term][document.tweet_id] = [document_dictionary[term], max_term_f, unique_terms, doc_len]
-                #     del self.first_time_term[lower_term]
-                #     continue
 
                 """--------------------------------------@ - Terms-----------------------------------------"""
 
@@ -225,8 +188,6 @@ class Indexer:
 
         with open(fn, 'rb') as f:
             return pickle.load(f)
-
-        # TODO - use utils instead this - load_obj(name)
 
 
     # DO NOT MODIFY THIS SIGNATURE

@@ -1,9 +1,7 @@
 import json
 
-from stemmer import Stemmer
 from nltk import TweetTokenizer, re
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
 from document import Document
 
 
@@ -111,22 +109,6 @@ class Parse:
                         after_parse_lst.append(text_tokens[i].lower())
             i += 1
 
-        # stemming = True  # Todo - remove
-        #
-        # if stemming:
-        #     ps = Stemmer()
-        #     lst_after_stem = []
-        #     for w in after_parse_lst:
-        #         if w[0] == "@" or w[0] == "#" or w[0].isnumeric() or " " in w:
-        #             lst_after_stem.append(w)
-        #             continue
-        #         if w == w.upper():
-        #             w = ps.stem_term(w)
-        #             w = w.upper()
-        #         else:
-        #             w = ps.stem_term(w)
-        #         lst_after_stem.append(w)
-        #     return lst_after_stem
 
         after_parse_lst = [x for x in after_parse_lst if x not in self.stop_words and x not in self.punc]
         return after_parse_lst
@@ -148,9 +130,6 @@ class Parse:
         quote_url = doc_as_list[7]
         term_dict = {}
         tokenized_text = self.parse_sentence(full_text)
-
-        # if quote_text is not None:
-        #     tokenized_text += self.parse_sentence(quote_text)  # TODO - if Results not good check with this
 
         if doc_as_list[3] is None or doc_as_list[3] == '[]' or doc_as_list[3] == '{}':
             url = None

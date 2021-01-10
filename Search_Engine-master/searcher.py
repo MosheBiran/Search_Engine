@@ -17,12 +17,21 @@ class Searcher:
         self._indexer = indexer
         indexer_dic = indexer.load_index("idx_bench.pkl")
         # indexer_dic = indexer.load_index("idx.pkl")  # TODO - this we need to submit
-        self._ranker = Ranker(indexer_dic["posting"], indexer_dic["docs"])
+        if "tweet_dic" in indexer_dic:
+            self._ranker = Ranker(indexer_dic["posting"], indexer_dic["docs"], indexer_dic["tweet_dic"])
+        else:
+            self._ranker = Ranker(indexer_dic["posting"], indexer_dic["docs"])
+
         self._model = model
 
         self.posting_dic = indexer_dic["posting"]
         self.invert_dic = indexer_dic["invert"]
         self.doc_dic = indexer_dic["docs"]
+
+        if "word2vec" in indexer_dic and model is not None:
+            self.word2vec = True
+        else:
+            self.word2vec = False
 
         if "global" in indexer_dic:
             self.Sij_dic = indexer_dic["global"]
@@ -82,6 +91,29 @@ class Searcher:
 
             if len(expend) != 0:
                 query_as_list.extend(expend)
+
+        if self.word2vec:
+            expend = []
+
+            # x = [y for y in query_as_list if y.isalpha()]
+            # res = self.Word2VecExpansion(x)
+            # if res is not None:
+            #     expend.append(res)
+            # for idx, term in enumerate(x):
+            #     res = self.WordNet_w2v(term, query_as_list)
+            #     if res is not None:
+            #         expend.append(res)
+            # if res is not None:
+            #     res = self.Word2VecExpansion(query_as_list)
+            #     if res is not None:
+            #         expend.append(res)
+            # if len(expend) != 0:
+            #     query_as_list.extend(expend)
+
+            # relevant_docs = self._relevant_docs_from_posting(query_as_list)
+            relevant_docs = self.second(query_as_list)
+            ranked_doc_ids = Ranker.rank_relevant_docs_w2v(self._ranker, self._model, query_as_list, relevant_docs)
+            return len(ranked_doc_ids), ranked_doc_ids
 
 
         if self.local:
@@ -263,3 +295,27 @@ class Searcher:
             new_query.append(term)
 
         return new_query
+
+    def WordNet_w2v(self, term, query_as_list):
+        syns_for_term = wordnet.synsets(term)
+        # if term not in self._model.wv.vocab:
+        for syns in syns_for_term:
+            lemmas = set(syns._lemma_names)
+            for lemma in lemmas:
+                # print(lemma)
+                if lemma.lower() not in query_as_list and lemma.lower() in self.invert_dic and lemma in self._model.wv.vocab:
+                    # if not self._model.wv.doesnt_match(query_as_list + [lemma]) == lemma:
+                    return lemma.lower()
+
+        return None
+
+    def Word2VecExpansion(self, query_as_list):
+        syns_for_term = self._model.wv.most_similar(query_as_list)[:15]
+        for lemma, val in syns_for_term:
+            # if lemma not in query_as_list and lemma in self.invert_dic:
+            if val > 0.6:
+                return lemma.lower()
+            else:
+                return None
+
+        return None

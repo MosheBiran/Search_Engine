@@ -2,10 +2,13 @@ import math
 import os
 import time
 
+import gensim as gensim
+from gensim.models import Word2Vec
+
 import pandas as pd
 from reader import ReadFile
 from configuration import ConfigClass
-from parser_module import Parse
+from parser_module_word2vec_2 import Parse
 from indexer import Indexer
 from searcher import Searcher
 import utils
@@ -36,13 +39,15 @@ class SearchEngine:
         documents_list = df.values.tolist()
         # Iterate over every document in the file
         number_of_documents = 0
-
+        tweet_dic = {}
         for idx, document in enumerate(documents_list):
             # parse the document
             parsed_document = self._parser.parse_doc(document)
+            tweet_dic[parsed_document.tweet_id] = [key for key in parsed_document.term_doc_dictionary.keys()]
             number_of_documents += 1
             # index the document data
             self._indexer.add_new_doc(parsed_document)
+
         print('Finished parsing and indexing.')
 
         self._indexer.save_index("idx_bench.pkl")
@@ -54,12 +59,17 @@ class SearchEngine:
         # indexer_dic = utils.load_obj("idx")  # TODO - we need submit this
 
         localMethod = False
-        globalMethod = True
+        word2vec = True
+        globalMethod = False
         wordNet = False
         spellChecker = False
 
         if localMethod:
             indexer_dic["local"] = True
+
+        if word2vec:
+            indexer_dic["word2vec"] = True
+            indexer_dic["tweet_dic"] = tweet_dic
 
         if wordNet:
             indexer_dic["wordnet"] = True
@@ -100,7 +110,16 @@ class SearchEngine:
         This is where you would load models like word2vec, LSI, LDA, etc. and
         assign to self._model, which is passed on to the searcher at query time.
         """
-        pass
+        self._model = gensim.models.KeyedVectors.load_word2vec_format(os.path.join(model_dir, 'trained_Word2Vec'),
+                                                                      binary=True,
+                                                                      encoding='utf-8', unicode_errors='ignore' )
+        # self._model = gensim.models.KeyedVectors.load_word2vec_format('trained_Word2Vec',
+        #                                                               binary=True,
+        #                                                               encoding='utf-8', unicode_errors='ignore')
+
+        # self._model = Word2Vec.load(model_dir + '\\Word2Vec_Model_full_min_10.model')
+        # self._model = Word2Vec.load("Word2Vec_Model")
+        self._config.set_download_model(False)
 
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.
@@ -118,7 +137,6 @@ class SearchEngine:
 
         searcher = Searcher(self._parser, self._indexer, model=self._model)
         return searcher.search(query)
-
 
 
 def compute_Wi(indexer, globalMethod=None):

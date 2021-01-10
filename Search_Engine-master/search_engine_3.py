@@ -54,8 +54,8 @@ class SearchEngine:
         # indexer_dic = utils.load_obj("idx")  # TODO - we need submit this
 
         localMethod = False
-        globalMethod = False
-        wordNet = True
+        globalMethod = True
+        wordNet = False
         spellChecker = False
 
         if localMethod:
@@ -118,6 +118,7 @@ class SearchEngine:
 
         searcher = Searcher(self._parser, self._indexer, model=self._model)
         return searcher.search(query)
+
 
 
 def compute_Wi(indexer, globalMethod=None):

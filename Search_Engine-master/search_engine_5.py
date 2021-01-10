@@ -3,8 +3,6 @@ import os
 import time
 
 import pandas as pd
-from reader import ReadFile
-from configuration import ConfigClass
 from parser_module import Parse
 from indexer import Indexer
 from searcher import Searcher
@@ -55,8 +53,8 @@ class SearchEngine:
 
         localMethod = False
         globalMethod = False
-        wordNet = True
-        spellChecker = False
+        wordNet = False
+        spellChecker = True
 
         if localMethod:
             indexer_dic["local"] = True
@@ -118,6 +116,7 @@ class SearchEngine:
 
         searcher = Searcher(self._parser, self._indexer, model=self._model)
         return searcher.search(query)
+
 
 
 def compute_Wi(indexer, globalMethod=None):

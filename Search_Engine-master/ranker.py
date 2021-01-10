@@ -3,11 +3,15 @@
 import copy
 import math
 
+import numpy as np
+from numpy.dual import norm
+
 
 class Ranker:
-    def __init__(self, posting_dic, docs_dic):
+    def __init__(self, posting_dic, docs_dic, tweet_dic=None):
         self.posting_dic = posting_dic
         self.docs_dic = docs_dic
+        self.tweet_dic = tweet_dic
 
 
 
@@ -156,3 +160,50 @@ class Ranker:
                 del copy_of_term[key[0]]
 
         return lst_of_word_to_add
+
+
+    def get_embedding_w2v(self, w2v_model, doc_tokens):
+        embeddings = []
+        if len(doc_tokens) < 1:
+            return np.zeros(300)
+        else:
+            for tok in doc_tokens:
+                if tok in w2v_model.wv.vocab:
+                    embeddings.append(w2v_model.wv.word_vec(tok))
+
+            # mean the vectors of individual words to get the vector of the document
+            return np.mean(embeddings, axis=0)
+
+
+    def rank_relevant_docs_w2v(self, w2v_model, query_as_list, relevant_docs):
+
+        # counter_of_terms = relevant_docs[1]  # key = term ___ value = number of times this term was in the query
+        relevant_doc = relevant_docs[0]  # the posting dic of all terms of the query
+
+        qvector = self.get_embedding_w2v(w2v_model, query_as_list)
+        tweet_id_data = {}
+        tweet_id_CosSim = {}
+
+        for value in relevant_doc.values():
+            for v in value.keys():
+                if v not in tweet_id_data:
+                    tweet_id_data[v] = self.docs_dic[v]
+                    tweet_id_CosSim[v] = [0]
+
+        # for key, value in tweet_id_data.items():
+        #     for term in query_as_list:
+        #         if term in value[0]:
+        #             sim = lambda x: cosine_similarity(np.array(qvector).reshape(1, -1), np.array(x).reshape(1, -1)).item()
+        #             value_v = self.get_embedding_w2v(w2v_model, self.tweet_dic[key])
+        #             tweet_id_CosSim[key] = sim(value_v)
+
+        norm_vec_q = norm(qvector)
+        for key, value in tweet_id_data.items():
+            for term in query_as_list:
+                vec = self.get_embedding_w2v(w2v_model, self.tweet_dic[key])
+                tweet_id_CosSim[key] = np.dot(qvector, vec) / (norm_vec_q * norm(vec))
+
+        res = dict(sorted(tweet_id_CosSim.items(), key=lambda e: e[1], reverse=True))  # for test
+
+        res2 = list(res.keys())
+        return res2

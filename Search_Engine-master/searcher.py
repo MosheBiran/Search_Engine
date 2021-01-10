@@ -15,8 +15,8 @@ class Searcher:
     def __init__(self, parser, indexer, model=None):
         self._parser = parser
         self._indexer = indexer
-        indexer_dic = indexer.load_index("idx_bench.pkl")
-        # indexer_dic = indexer.load_index("idx.pkl")  # TODO - this we need to submit
+        # indexer_dic = indexer.load_index("idx_bench.pkl")
+        indexer_dic = indexer.load_index("idx.pkl")  # TODO - this we need to submit
         if "tweet_dic" in indexer_dic:
             self._ranker = Ranker(indexer_dic["posting"], indexer_dic["docs"], indexer_dic["tweet_dic"])
         else:

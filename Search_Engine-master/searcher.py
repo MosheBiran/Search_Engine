@@ -90,6 +90,7 @@ class Searcher:
                     expend.append(res)
 
             if len(expend) != 0:
+                print(expend)  # TODO - For Report
                 query_as_list.extend(expend)
 
         if self.word2vec:
@@ -214,6 +215,9 @@ class Searcher:
                 if key[1] not in query_copy_not_delete and key[1] not in lst_of_word_to_add:
                     lst_of_word_to_add.append(key[1])
                 del query_copy[key[0]]
+
+        for word in lst_of_word_to_add:  # TODO - for the report
+            print(word)
 
         return lst_of_word_to_add
 

@@ -64,6 +64,13 @@ class Ranker:
             tweet_id_CosSim[key][2] = cos_sim
 
         res = dict(sorted(tweet_id_CosSim.items(), key=lambda e: e[1][2], reverse=True))
+
+        i = 0
+        for k, v in res.items():
+            if i == 5:
+                break
+            print(k + "   " + str(v[2]))
+            i += 1
         res2 = list(res.keys())
 
         return res2
@@ -159,6 +166,9 @@ class Ranker:
                     lst_of_word_to_add.append(key[1])
                 del copy_of_term[key[0]]
 
+        for word in lst_of_word_to_add:  # TODO - for the report
+            print(word)
+
         return lst_of_word_to_add
 
 
@@ -203,6 +213,11 @@ class Ranker:
                 tweet_id_CosSim[key] = np.dot(qvector, vec) / (norm_vec_q * norm(vec))
 
         res1 = dict(sorted(tweet_id_CosSim.items(), key=lambda e: e[1], reverse=True))  # for test
-
+        i = 0
+        for k, v in res1.items():
+            if i == 5:
+                break
+            print(k + " --Word2Vec Rank :    " + str(v))
+            i += 1
         res12 = list(res1.keys())
         return res12

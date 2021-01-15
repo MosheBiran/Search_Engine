@@ -88,7 +88,10 @@ class SearchEngine:
         # utils.save_obj(indexer_dic, "idx_bench")
         utils.save_obj(indexer_dic, "idx")  # TODO - we need submit this
 
-
+        print("\n******************\n")
+        print("Search Engine 2")
+        print("Number Of Words In Invert Index : " + str(len(indexer_dic["invert"])))
+        print("\n******************\n")
 
     # DO NOT MODIFY THIS SIGNATURE
     # You can change the internal implementation as you see fit.
@@ -111,6 +114,7 @@ class SearchEngine:
         self._model = gensim.models.KeyedVectors.load_word2vec_format(os.path.join(model_dir, 'trained_Word2Vec'),
                                                                       binary=True,
                                                                       encoding='utf-8', unicode_errors='ignore')
+        self._model.init_sims(replace=False)  # TODO - For Report
 
         self._config.set_download_model(False)
 

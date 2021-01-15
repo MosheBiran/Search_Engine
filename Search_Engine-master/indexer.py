@@ -34,19 +34,21 @@ class Indexer:
 
         """
         docs dic:
-        key = doc name : invert | posting | docs
+        key = doc/flag name : invert | posting | docs | local | wordnet | spellChecker | word2vec | tweet_dic | global
         
-        value = the inner dictionary's
+        value = the inner dictionary's / Flag = True or False
         
+                -------------------------------------------------------------------------------------------
+
         invert dic:
         key = term
 
-        value =  number of tweets he in 
+        value =  term frequency
                 -------------------------------------------------------------------------------------------
         posting dic:
         key = term 
 
-        value = [ {key = doc id : value = [[num in this tweet , [positions], max term freq in the tweet, unique terms in this tweet, doc_le]} ]
+        value = [ {key = tweet id : value = [[num in this tweet , [positions], max term freq in the tweet, unique terms in this tweet, doc_le]} ]
                 -------------------------------------------------------------------------------------------
         doc dic
         key = tweet id 
